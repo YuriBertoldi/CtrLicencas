@@ -1,0 +1,378 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Licenças Delphi</h1>
+    <p class="page-subtitle">Cadastro de seriais — XE3, D12, Interbase, HTML5Builder</p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/auditoria?entidade=licenca" class="btn-secondary">Relatório</a>
+    <button class="btn-secondary" data-open-dialog="dlg-grupos">Grupos</button>
+    <button class="btn-primary" id="btn-nova-lic">+ Nova Licença</button>
+  </div>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+
+{{if .DevID}}
+<div class="alert" style="background:rgba(52,152,219,0.12);border:1px solid rgba(52,152,219,0.3);color:var(--color-accent);border-radius:var(--radius-sm);padding:.55rem 1rem;margin-bottom:1rem;font-size:.875rem;display:flex;align-items:center;justify-content:space-between">
+  <span>&#x1F50D; Exibindo licenças do desenvolvedor selecionado</span>
+  <a href="/licencas" style="color:var(--color-accent);font-weight:600;text-decoration:none">Ver todas</a>
+</div>
+{{end}}
+
+<div class="toolbar">
+  <input type="text" id="search-lic" placeholder="Buscar por dev, serial, versao..." class="search-input">
+  <select id="filter-versao" class="filter-select">
+    <option value="">Todas as versoes</option>
+    {{range .Versoes}}<option value="{{.}}">{{.}}</option>{{end}}
+  </select>
+  <select id="filter-canal" class="filter-select">
+    <option value="">Todos os controles</option>
+    {{range .Canais}}<option value="{{.}}">{{.}}</option>{{end}}
+  </select>
+  <select id="filter-status" class="filter-select">
+    <option value="">Em Uso e Livre</option>
+    <option value="Em Uso">Em Uso</option>
+    <option value="Livre">Livre</option>
+  </select>
+  <span id="count-lic" class="count-label"></span>
+</div>
+
+<div class="table-wrapper">
+  <table id="tbl-lic" style="min-width:920px">
+    <thead>
+      <tr>
+        <th data-sort="0">Desenvolvedor <span class="sort-ico">↕</span></th>
+        <th data-sort="1">Versão <span class="sort-ico">↕</span></th>
+        <th data-sort="2">Serial <span class="sort-ico">↕</span></th>
+        <th data-sort="3">Tipo <span class="sort-ico">↕</span></th>
+        <th data-sort="4">Controle <span class="sort-ico">↕</span></th>
+        <th data-sort="5">Grupo <span class="sort-ico">↕</span></th>
+        <th data-sort="6">Status <span class="sort-ico">↕</span></th>
+        <th class="col-actions">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Licencas}}
+      <tr>
+        <td class="col-dev">
+          {{if .DevNome}}<strong>{{.DevNome}}</strong>{{else}}<span class="text-muted">—</span>{{end}}
+        </td>
+        <td>
+          <span class="badge badge--{{if eq .Versao "D12"}}purple{{else if eq .Versao "XE3"}}blue{{else if eq .Versao "Interbase"}}orange{{else}}teal{{end}}">
+            {{.Versao}}
+          </span>
+        </td>
+        <td class="col-serial"><code class="serial">{{.Serial}}</code></td>
+        <td>{{.Tipo}}</td>
+        <td>
+          <span class="badge badge--{{if eq .Canal "Network"}}purple{{else}}teal{{end}}">{{.Canal}}</span>
+        </td>
+        <td>
+          {{if .GrupoNome}}<span class="badge badge--indigo">{{.GrupoNome}}</span>{{else}}<span class="text-muted">—</span>{{end}}
+        </td>
+        <td>
+          {{if .DevID}}
+            <span class="badge badge--green">Em Uso</span>
+          {{else}}
+            <span class="badge badge--blue">Livre</span>
+          {{end}}
+        </td>
+        <td class="col-actions">
+          <div class="actions-grid">
+            <button class="btn-icon btn-view" data-open-dialog="dlg-ver-lic-{{.ID}}" title="Ver dados">&#x1F441;</button>
+            <button class="btn-icon btn-link" data-open-dialog="dlg-vincular-{{.ID}}" title="Vincular dev">&#x1F517;</button>
+            <button class="btn-icon btn-edit" title="Editar"
+            data-edit-lic
+            data-id="{{.ID}}" data-serial="{{.Serial}}" data-versao="{{.Versao}}"
+            data-tipo="{{.Tipo}}" data-canal="{{.Canal}}" data-dev-id="{{derefInt .DevID}}"
+            data-hostname="{{.Hostname}}" data-edn-login="{{.EdnLogin}}" data-edn-senha="{{.EdnSenha}}"
+            data-cad-efetuado="{{.CadEfetuado}}" data-data-cad="{{dateInput .DataCad}}"
+            data-obs="{{.Obs}}" data-grupo-id="{{derefInt .GrupoID}}">&#x270F;</button>
+            <form method="POST" action="/licencas/{{.ID}}/delete" onsubmit="return confirm('Excluir esta licença?')">
+              <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Dialog: ver dados -->
+      <dialog id="dlg-ver-lic-{{.ID}}">
+        <article>
+          <header>
+            <h4>
+              <span class="badge badge--{{if eq .Versao "D12"}}purple{{else if eq .Versao "XE3"}}blue{{else if eq .Versao "Interbase"}}orange{{else}}teal{{end}}" style="font-size:.8rem">{{.Versao}}</span>
+              {{if .DevNome}} {{.DevNome}}{{else}} Livre{{end}}
+            </h4>
+          </header>
+          <div class="data-view">
+            <div class="data-row">
+              <span class="data-label">Serial</span>
+              <span class="data-value"><code>{{.Serial}}</code></span>
+              <button class="btn-copy" data-copy="{{.Serial}}" title="Copiar">&#x1F4CB;</button>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Controle</span>
+              <span class="data-value"><span class="badge badge--{{if eq .Canal "Network"}}purple{{else}}teal{{end}}">{{.Canal}}</span></span>
+            </div>
+            {{if .Hostname}}
+            <div class="data-row">
+              <span class="data-label">Hostname</span>
+              <span class="data-value"><code>{{.Hostname}}</code></span>
+              <button class="btn-copy" data-copy="{{.Hostname}}" title="Copiar">&#x1F4CB;</button>
+            </div>
+            {{end}}
+            <div class="data-row">
+              <span class="data-label">EDN Login</span>
+              <span class="data-value"><code>{{if .EdnLogin}}{{.EdnLogin}}{{else}}—{{end}}</code></span>
+              {{if .EdnLogin}}<button class="btn-copy" data-copy="{{.EdnLogin}}" title="Copiar login">&#x1F4CB;</button>{{end}}
+            </div>
+            <div class="data-row">
+              <span class="data-label">EDN Senha</span>
+              <span class="data-value"><code id="senha-ver-{{.ID}}">••••••</code></span>
+              <button class="btn-icon" style="width:26px;height:26px;font-size:.75rem" onclick="toggleVerSenha('{{.EdnSenha}}','senha-ver-{{.ID}}')" title="Revelar">&#x1F441;</button>
+              {{if .EdnSenha}}<button class="btn-copy" data-copy="{{.EdnSenha}}" title="Copiar senha">&#x1F4CB;</button>{{end}}
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tipo</span>
+              <span class="data-value">{{.Versao}} — {{.Tipo}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Data Cad.</span>
+              <span class="data-value">{{datep .DataCad}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Cad. EDN</span>
+              <span class="data-value">{{if .CadEfetuado}}<span class="badge badge--green">Sim</span>{{else}}<span class="badge badge--gray">Nao</span>{{end}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Status</span>
+              <span class="data-value">
+                {{if .DevID}}<span class="badge badge--green">Em Uso — {{.DevNome}}</span>
+                {{else}}<span class="badge badge--blue">Livre</span>{{end}}
+              </span>
+            </div>
+            {{if .Obs}}
+            <div class="data-row">
+              <span class="data-label">Obs</span>
+              <span class="data-value">{{.Obs}}</span>
+              <button class="btn-copy" data-copy="{{.Obs}}" title="Copiar obs">&#x1F4CB;</button>
+            </div>
+            {{end}}
+          </div>
+          <footer>
+            <a href="/auditoria?entidade=licenca&entidade_id={{.ID}}" class="btn-secondary" style="margin-right:auto;font-size:.8rem">Histórico</a>
+            <button type="button" data-close-dialog class="btn-secondary">Fechar</button>
+            <button class="btn-primary" data-edit-lic
+              data-id="{{.ID}}" data-serial="{{.Serial}}" data-versao="{{.Versao}}"
+              data-tipo="{{.Tipo}}" data-canal="{{.Canal}}" data-dev-id="{{derefInt .DevID}}"
+              data-hostname="{{.Hostname}}" data-edn-login="{{.EdnLogin}}" data-edn-senha="{{.EdnSenha}}"
+              data-cad-efetuado="{{.CadEfetuado}}" data-data-cad="{{dateInput .DataCad}}"
+              data-obs="{{.Obs}}" data-grupo-id="{{derefInt .GrupoID}}">Editar</button>
+          </footer>
+        </article>
+      </dialog>
+
+      <!-- Dialog: vincular desenvolvedor -->
+      <dialog id="dlg-vincular-{{.ID}}">
+        <article>
+          <header><h4>Vincular Desenvolvedor</h4></header>
+          <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:1rem">
+            Serial: <code>{{.Serial}}</code> ({{.Versao}})
+          </p>
+          <form method="POST" action="/licencas/{{.ID}}/vincular">
+            <label>Desenvolvedor
+              <select name="dev_id">
+                {{$devID := derefInt .DevID}}
+                <option value="" {{if eq $devID 0}}selected{{end}}>— Livre / Desvincular —</option>
+                {{range $.Devs}}
+                <option value="{{.ID}}" {{if eq .ID $devID}}selected{{end}}>{{.Nome}}{{if eq .Status "livre"}} (livre){{end}}</option>
+                {{end}}
+              </select>
+            </label>
+            <footer>
+              <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+              <button type="submit" class="btn-primary">Confirmar</button>
+            </footer>
+          </form>
+        </article>
+      </dialog>
+
+      {{end}}
+    </tbody>
+  </table>
+  <p id="no-lic" style="display:none" class="no-results">Nenhuma licença encontrada.</p>
+</div>
+
+<!-- Dialog unificado: criar / editar licença -->
+<dialog id="dlg-lic">
+  <article>
+    <header><h4 id="dlg-lic-title">Nova Licença Delphi</h4></header>
+    <form id="dlg-lic-form" method="POST" action="/licencas">
+      <div class="form-grid-2">
+        <label>Serial <input name="serial" id="lic-serial" placeholder="XXXX-XXXXXXXX-XXXXXXXX-XXXX"></label>
+        <label>Versão *
+          <select name="versao" id="lic-versao" required>
+            {{range .Versoes}}<option value="{{.}}">{{.}}</option>{{end}}
+          </select>
+        </label>
+        <label>Tipo
+          <select name="tipo" id="lic-tipo">
+            {{range .Tipos}}<option value="{{.}}">{{.}}</option>{{end}}
+          </select>
+        </label>
+        <label>Tipo de Controle
+          <select name="canal" id="lic-canal">
+            {{range .Canais}}<option value="{{.}}">{{.}}</option>{{end}}
+          </select>
+        </label>
+        <label>Desenvolvedor (Em Uso por)
+          <select name="dev_id" id="lic-dev-id">
+            <option value="">— Livre —</option>
+            {{range .Devs}}<option value="{{.ID}}">{{.Nome}}</option>{{end}}
+          </select>
+        </label>
+        <label>Hostname <input name="hostname" id="lic-hostname" placeholder="PC-DEV01"></label>
+        <label>EDN Login <input name="edn_login" id="lic-edn-login" placeholder="contdev01@empresa.com.br"></label>
+        <label>EDN Senha <input name="edn_senha" id="lic-edn-senha"></label>
+        <label>Data Cadastro <input type="date" name="data_cad" id="lic-data-cad"></label>
+        <label>Cad. EDN
+          <select name="cad_efetuado" id="lic-cad-efetuado">
+            <option value="false">Nao</option>
+            <option value="true">Sim</option>
+          </select>
+        </label>
+        <label class="full-width">Grupo (licença física)
+          <select name="grupo_id" id="lic-grupo-id">
+            <option value="">— Sem grupo —</option>
+            {{range .Grupos}}<option value="{{.ID}}">{{.Nome}}</option>{{end}}
+          </select>
+        </label>
+      </div>
+      <label>Obs <textarea name="obs" id="lic-obs" rows="2"></textarea></label>
+      <footer>
+        <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary" id="dlg-lic-submit">Cadastrar</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+
+<!-- Dialog: gerenciar grupos -->
+<dialog id="dlg-grupos">
+  <article>
+    <header><h4>Grupos de Licença</h4></header>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">
+      Agrupe seriais de versões diferentes (ex: XE3 + D12) que pertencem à mesma licença física.
+      Ao vincular um dev a qualquer serial do grupo, todos os seriais do grupo são vinculados automaticamente.
+    </p>
+    {{if .Grupos}}
+    <div class="table-wrapper" style="margin-bottom:1.2rem">
+      <table>
+        <thead><tr><th>Nome</th><th>Obs</th><th class="col-actions" style="width:60px">Acao</th></tr></thead>
+        <tbody>
+          {{range .Grupos}}
+          <tr>
+            <td><strong>{{.Nome}}</strong></td>
+            <td style="color:var(--text-muted);font-size:.85rem">{{if .Obs}}{{.Obs}}{{else}}—{{end}}</td>
+            <td class="col-actions">
+              <form method="POST" action="/grupos/{{.ID}}/delete" onsubmit="return confirm('Excluir grupo {{.Nome}}? Os seriais vinculados serao desassociados do grupo.')">
+                <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
+              </form>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1rem">Nenhum grupo cadastrado.</p>
+    {{end}}
+    <form method="POST" action="/grupos" style="border-top:1px solid var(--border-mid);padding-top:1rem">
+      <p style="font-size:.85rem;font-weight:600;margin-bottom:.6rem">Novo grupo</p>
+      <div class="form-grid-2">
+        <label>Nome * <input name="nome" placeholder="Ex: Lic Fisica 01" required></label>
+        <label>Obs <input name="obs" placeholder="Opcional"></label>
+      </div>
+      <footer style="margin-top:.8rem">
+        <button type="button" data-close-dialog class="btn-secondary">Fechar</button>
+        <button type="submit" class="btn-primary">Criar Grupo</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+
+<script>
+  initTableFilter({
+    tableId: 'tbl-lic',
+    searchId: 'search-lic',
+    filters: [
+      { id: 'filter-versao', col: 1 },
+      { id: 'filter-canal',  col: 4 },
+      { id: 'filter-status', col: 6 },
+    ],
+    noResultsId: 'no-lic',
+    countId: 'count-lic',
+  });
+  initTableSort('tbl-lic');
+
+  function toggleVerSenha(senha, elId) {
+    const el = document.getElementById(elId);
+    el.textContent = el.textContent === '••••••' ? senha : '••••••';
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-copy');
+    if (!btn) return;
+    const text = btn.dataset.copy || '';
+    navigator.clipboard.writeText(text).then(function() {
+      const orig = btn.innerHTML;
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+
+  // Dialog unificado licença
+  var dlgLic = document.getElementById('dlg-lic');
+  var dlgLicForm = document.getElementById('dlg-lic-form');
+
+  function openNewLic() {
+    document.getElementById('dlg-lic-title').textContent = 'Nova Licença Delphi';
+    document.getElementById('dlg-lic-submit').textContent = 'Cadastrar';
+    dlgLicForm.action = '/licencas';
+    dlgLicForm.reset();
+    dlgLic.showModal();
+  }
+
+  document.getElementById('btn-nova-lic').addEventListener('click', openNewLic);
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-edit-lic]');
+    if (!btn) return;
+    var d = btn.dataset;
+    // Fechar dialog anterior se aberto (ex: vindo do dialog de visualização)
+    var parentDlg = btn.closest('dialog');
+    if (parentDlg) parentDlg.close();
+
+    document.getElementById('dlg-lic-title').textContent = 'Editar Licença';
+    document.getElementById('dlg-lic-submit').textContent = 'Salvar';
+    dlgLicForm.action = '/licencas/' + d.id + '/update';
+
+    document.getElementById('lic-serial').value = d.serial || '';
+    document.getElementById('lic-versao').value = d.versao || '';
+    document.getElementById('lic-tipo').value = d.tipo || '';
+    document.getElementById('lic-canal').value = d.canal || 'EDN';
+    document.getElementById('lic-dev-id').value = d.devId || '';
+    document.getElementById('lic-hostname').value = d.hostname || '';
+    document.getElementById('lic-edn-login').value = d.ednLogin || '';
+    document.getElementById('lic-edn-senha').value = d.ednSenha || '';
+    document.getElementById('lic-cad-efetuado').value = d.cadEfetuado === 'true' ? 'true' : 'false';
+    document.getElementById('lic-data-cad').value = d.dataCad || '';
+    document.getElementById('lic-obs').value = d.obs || '';
+    document.getElementById('lic-grupo-id').value = d.grupoId || '';
+
+    dlgLic.showModal();
+  });
+</script>
+{{end}}

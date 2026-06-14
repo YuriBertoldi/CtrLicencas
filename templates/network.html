@@ -1,0 +1,117 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Licenças Network</h1>
+    <p class="page-subtitle">Servidor de licenças interno (Embarcadero Named/Network)</p>
+  </div>
+  <button class="btn-primary" data-open-dialog="dlg-nova-net">+ Nova Entrada</button>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+
+<div class="table-wrapper">
+  <table id="tbl-net" style="min-width:800px">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Descricao</th>
+        <th>Tipo</th>
+        <th>Seats</th>
+        <th>Login Name</th>
+        <th>Senha</th>
+        <th>Obs</th>
+        <th class="col-actions">Acoes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Licencas}}
+      <tr>
+        <td><code>{{.SKU}}</code></td>
+        <td>{{.Descricao}}</td>
+        <td>
+          <span class="badge badge--{{if eq .Tipo "Enterprise"}}purple{{else}}blue{{end}}">{{.Tipo}}</span>
+        </td>
+        <td><strong>{{.TotalSeats}}</strong></td>
+        <td><code>{{.LoginName}}</code></td>
+        <td>
+          <span class="senha-mask" onclick="toggleSenha(this)" data-senha="{{.Senha}}" title="Clique para revelar">••••••</span>
+        </td>
+        <td class="text-muted obs-cell">{{.Obs}}</td>
+        <td class="col-actions">
+          <button class="btn-icon btn-edit" data-open-dialog="dlg-edit-net-{{.ID}}" title="Editar">&#x270F;</button>
+          <form method="POST" action="/network/{{.ID}}/delete" style="display:inline"
+                onsubmit="return confirm('Excluir esta entrada de licença network?')">
+            <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
+          </form>
+        </td>
+      </tr>
+
+      <dialog id="dlg-edit-net-{{.ID}}">
+        <article>
+          <header><h4>Editar Licença Network</h4></header>
+          <form method="POST" action="/network/{{.ID}}/update">
+            <div class="form-grid-2">
+              <label>SKU <input name="sku" value="{{.SKU}}"></label>
+              <label>Total Seats <input type="number" name="total_seats" value="{{.TotalSeats}}" min="0"></label>
+              <label>Tipo
+                <select name="tipo">
+                  <option value="Professional" {{if eq .Tipo "Professional"}}selected{{end}}>Professional</option>
+                  <option value="Enterprise"   {{if eq .Tipo "Enterprise"}}selected{{end}}>Enterprise</option>
+                </select>
+              </label>
+              <label>Login Name <input name="login_name" value="{{.LoginName}}"></label>
+              <label>Senha <input name="senha" value="{{.Senha}}"></label>
+            </div>
+            <label>Descricao <input name="descricao" value="{{.Descricao}}"></label>
+            <label>Obs <textarea name="obs" rows="2">{{.Obs}}</textarea></label>
+            <footer>
+              <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+              <button type="submit" class="btn-primary">Salvar</button>
+            </footer>
+          </form>
+        </article>
+      </dialog>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+<!-- Dialog: nova entrada network -->
+<dialog id="dlg-nova-net">
+  <article>
+    <header><h4>Nova Licença Network</h4></header>
+    <form method="POST" action="/network">
+      <div class="form-grid-2">
+        <label>SKU <input name="sku" placeholder="HDB000MLELWB0"></label>
+        <label>Total Seats <input type="number" name="total_seats" value="0" min="0"></label>
+        <label>Tipo
+          <select name="tipo">
+            <option value="Professional">Professional</option>
+            <option value="Enterprise">Enterprise</option>
+          </select>
+        </label>
+        <label>Login Name <input name="login_name" placeholder="acct-XXXXXXXXXXX"></label>
+        <label>Senha <input name="senha"></label>
+      </div>
+      <label>Descricao <input name="descricao" placeholder="Delphi Professional Network Named License"></label>
+      <label>Obs <textarea name="obs" rows="2" placeholder="License Certificate Number: ..."></textarea></label>
+      <footer>
+        <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary">Cadastrar</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+
+<script>
+  function toggleSenha(el) {
+    if (el.textContent === '••••••') {
+      el.textContent = el.dataset.senha;
+      el.style.fontFamily = 'monospace';
+    } else {
+      el.textContent = '••••••';
+      el.style.fontFamily = '';
+    }
+  }
+</script>
+{{end}}

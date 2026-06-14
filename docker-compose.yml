@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: delphilic
+      POSTGRES_PASSWORD: delphilic
+      POSTGRES_DB: delphilic
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PORT: 8081
+      DATABASE_URL: postgres://delphilic:delphilic@db:5432/delphilic?sslmode=disable
+      ADMIN_EMAIL: admin@delphilic.local
+      ADMIN_SENHA: admin123
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./templates:/app/templates
+      - ./static:/app/static
+
+volumes:
+  pgdata:

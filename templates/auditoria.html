@@ -1,0 +1,155 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Auditoria</h1>
+    <p class="page-subtitle">
+      {{if and .Entidade (gt .EntidadeID 0)}}
+        Histórico da {{.Entidade}} #{{.EntidadeID}}
+      {{else}}
+        Histórico de alterações do sistema
+      {{end}}
+    </p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    {{if and .Entidade (gt .EntidadeID 0)}}
+    <a href="/auditoria" class="btn-secondary">Ver todo histórico</a>
+    {{end}}
+    <a href="/auditoria/export?entidade={{.Entidade}}&entidade_id={{.EntidadeID}}" class="btn-secondary">Exportar CSV</a>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search-audit" placeholder="Buscar por usuário, ação, detalhes..." class="search-input">
+  <select id="filter-entidade" class="filter-select">
+    <option value="">Todas as entidades</option>
+    <option value="licenca" {{if eq .Entidade "licenca"}}selected{{end}}>Licença</option>
+    <option value="dev" {{if eq .Entidade "dev"}}selected{{end}}>Desenvolvedor</option>
+    <option value="componente" {{if eq .Entidade "componente"}}selected{{end}}>Componente</option>
+    <option value="grupo" {{if eq .Entidade "grupo"}}selected{{end}}>Grupo</option>
+  </select>
+  <select id="filter-acao" class="filter-select">
+    <option value="">Todas as ações</option>
+    <option value="criar">Criar</option>
+    <option value="editar">Editar</option>
+    <option value="excluir">Excluir</option>
+    <option value="vincular">Vincular</option>
+    <option value="desvincular">Desvincular</option>
+  </select>
+  <span id="count-audit" class="count-label"></span>
+</div>
+
+<div class="table-wrapper">
+  <table id="tbl-audit" style="min-width:750px">
+    <thead>
+      <tr>
+        <th data-sort="0" style="width:140px">Data/Hora <span class="sort-ico">↕</span></th>
+        <th data-sort="1">Usuário <span class="sort-ico">↕</span></th>
+        <th data-sort="2">Entidade <span class="sort-ico">↕</span></th>
+        <th data-sort="3">ID</th>
+        <th data-sort="4">Ação <span class="sort-ico">↕</span></th>
+        <th>Detalhes</th>
+        <th style="width:50px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Logs}}
+      <tr>
+        <td style="white-space:nowrap;font-size:.82rem">{{.CriadoEm.Format "02/01/2006 15:04"}}</td>
+        <td><strong>{{.Usuario}}</strong></td>
+        <td>
+          <span class="badge badge--{{if eq .Entidade "licenca"}}blue{{else if eq .Entidade "dev"}}green{{else if eq .Entidade "componente"}}purple{{else}}teal{{end}}">
+            {{.Entidade}}
+          </span>
+        </td>
+        <td>
+          <a href="/auditoria?entidade={{.Entidade}}&entidade_id={{.EntidadeID}}" style="color:var(--color-accent)">#{{.EntidadeID}}</a>
+        </td>
+        <td>
+          <span class="badge badge--{{if eq .Acao "criar"}}green{{else if eq .Acao "editar"}}blue{{else if eq .Acao "excluir"}}red{{else if eq .Acao "vincular"}}purple{{else if eq .Acao "desvincular"}}orange{{else}}gray{{end}}">
+            {{.Acao}}
+          </span>
+        </td>
+        <td class="text-muted" style="font-size:.82rem;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{.Detalhes}}</td>
+        <td>
+          <button class="btn-icon btn-view" data-open-dialog="dlg-audit-{{.ID}}" title="Visualizar">&#x1F441;</button>
+        </td>
+      </tr>
+
+      <dialog id="dlg-audit-{{.ID}}">
+        <article>
+          <header>
+            <h4>
+              <span class="badge badge--{{if eq .Acao "criar"}}green{{else if eq .Acao "editar"}}blue{{else if eq .Acao "excluir"}}red{{else if eq .Acao "vincular"}}purple{{else if eq .Acao "desvincular"}}orange{{else}}gray{{end}}" style="font-size:.8rem">{{.Acao}}</span>
+              {{.Entidade}} #{{.EntidadeID}}
+            </h4>
+          </header>
+          <div class="data-view">
+            <div class="data-row">
+              <span class="data-label">Data/Hora</span>
+              <span class="data-value">{{.CriadoEm.Format "02/01/2006 15:04:05"}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Usuário</span>
+              <span class="data-value"><strong>{{.Usuario}}</strong></span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Entidade</span>
+              <span class="data-value">
+                <span class="badge badge--{{if eq .Entidade "licenca"}}blue{{else if eq .Entidade "dev"}}green{{else if eq .Entidade "componente"}}purple{{else}}teal{{end}}">{{.Entidade}}</span>
+              </span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">ID do Registro</span>
+              <span class="data-value">#{{.EntidadeID}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Ação</span>
+              <span class="data-value">
+                <span class="badge badge--{{if eq .Acao "criar"}}green{{else if eq .Acao "editar"}}blue{{else if eq .Acao "excluir"}}red{{else if eq .Acao "vincular"}}purple{{else if eq .Acao "desvincular"}}orange{{else}}gray{{end}}">{{.Acao}}</span>
+              </span>
+            </div>
+            <div class="data-row" style="flex-direction:column;align-items:flex-start;gap:.4rem">
+              <span class="data-label">Detalhes</span>
+              <span class="data-value audit-detail-text">{{.Detalhes}}</span>
+            </div>
+          </div>
+          <footer>
+            <a href="/auditoria?entidade={{.Entidade}}&entidade_id={{.EntidadeID}}" class="btn-secondary" style="margin-right:auto;font-size:.8rem">Ver histórico completo</a>
+            <button type="button" data-close-dialog class="btn-secondary">Fechar</button>
+          </footer>
+        </article>
+      </dialog>
+      {{end}}
+    </tbody>
+  </table>
+  <p id="no-audit" style="display:none" class="no-results">Nenhum registro encontrado.</p>
+</div>
+
+{{if gt .Total .PorPagina}}
+<div class="pagination">
+  {{if gt .Pagina 1}}
+    <a href="/auditoria?entidade={{.Entidade}}&entidade_id={{.EntidadeID}}&pagina={{sub .Pagina 1}}" class="btn-sm">Anterior</a>
+  {{end}}
+  <span class="text-muted" style="font-size:.85rem">
+    Página {{.Pagina}} — {{.Total}} registros
+  </span>
+  {{if lt (mul .Pagina .PorPagina) .Total}}
+    <a href="/auditoria?entidade={{.Entidade}}&entidade_id={{.EntidadeID}}&pagina={{add .Pagina 1}}" class="btn-sm">Próxima</a>
+  {{end}}
+</div>
+{{end}}
+
+<script>
+  initTableFilter({
+    tableId: 'tbl-audit',
+    searchId: 'search-audit',
+    filters: [
+      { id: 'filter-entidade', col: 2 },
+      { id: 'filter-acao',     col: 4 },
+    ],
+    noResultsId: 'no-audit',
+    countId: 'count-audit',
+  });
+  initTableSort('tbl-audit');
+</script>
+{{end}}

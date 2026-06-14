@@ -1,0 +1,112 @@
+{{define "content"}}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p class="page-subtitle">Visão geral das licenças e desenvolvedores</p>
+</div>
+
+<!-- Desenvolvedores -->
+<div class="dash-section-label">Desenvolvedores</div>
+<div class="stats-grid stats-grid--3">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value">{{.TotalDevs}}</div>
+    <div class="stat-sub">cadastrados</div>
+  </div>
+  <div class="stat-card stat-card--green">
+    <div class="stat-label">Ativos</div>
+    <div class="stat-value">{{.DevsAtivos}}</div>
+    <div class="stat-sub">com licença em uso</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Livres</div>
+    <div class="stat-value">{{.DevsLivres}}</div>
+    <div class="stat-sub">sem licença vinculada</div>
+  </div>
+</div>
+
+<!-- Licenças -->
+<div class="dash-section-label">Licenças Delphi</div>
+<div class="stats-grid stats-grid--5">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value">{{.TotalLicencas}}</div>
+    <div class="stat-sub">seriais cadastrados</div>
+  </div>
+  <div class="stat-card stat-card--orange">
+    <div class="stat-label">Em uso</div>
+    <div class="stat-value">{{.LicencasEmUso}}</div>
+    <div class="stat-sub">vinculadas a devs</div>
+  </div>
+  <div class="stat-card stat-card--green">
+    <div class="stat-label">Livres</div>
+    <div class="stat-value">{{.LicencasLivres}}</div>
+    <div class="stat-sub">disponíveis</div>
+  </div>
+  <div class="stat-card stat-card--blue">
+    <div class="stat-label">XE3</div>
+    <div class="stat-value">{{.TotalLicencasXE3}}</div>
+    <div class="stat-sub">seriais</div>
+  </div>
+  <div class="stat-card stat-card--purple">
+    <div class="stat-label">D12</div>
+    <div class="stat-value">{{.TotalLicencasD12}}</div>
+    <div class="stat-sub">seriais</div>
+  </div>
+</div>
+
+<!-- Componentes -->
+<div class="dash-section-label">Componentes</div>
+<div class="stats-grid stats-grid--3">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value">{{.TotalComponentes}}</div>
+    <div class="stat-sub">componentes</div>
+  </div>
+  <div class="stat-card stat-card--orange">
+    <div class="stat-label">Pagos</div>
+    <div class="stat-value">{{.ComponentesPagos}}</div>
+    <div class="stat-sub">licenças comerciais</div>
+  </div>
+  <div class="stat-card stat-card--green">
+    <div class="stat-label">Free</div>
+    <div class="stat-value">{{.ComponentesFree}}</div>
+    <div class="stat-sub">open source / grátis</div>
+  </div>
+</div>
+
+{{if .RecentesLicencas}}
+<section class="section-card" style="margin-top:1.5rem">
+  <div class="section-header">
+    <h3>Licenças Recentes</h3>
+    <a href="/licencas" class="btn-sm">Ver todas</a>
+  </div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Desenvolvedor</th>
+          <th>Versão</th>
+          <th>Tipo</th>
+          <th>Serial</th>
+          <th>Cadastro EDN</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .RecentesLicencas}}
+        <tr>
+          <td>{{if .DevNome}}{{.DevNome}}{{else}}<span class="text-muted">—</span>{{end}}</td>
+          <td><span class="badge badge--{{versaoBadge .Versao}}">{{.Versao}}</span></td>
+          <td>{{.Tipo}}</td>
+          <td><code class="serial">{{.Serial}}</code></td>
+          <td>
+            {{if .CadEfetuado}}<span class="badge badge--green">Ok</span>
+            {{else}}<span class="badge badge--gray">Pendente</span>{{end}}
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{end}}
+{{end}}

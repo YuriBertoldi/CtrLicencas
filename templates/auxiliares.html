@@ -1,0 +1,130 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Auxiliares</h1>
+    <p class="page-subtitle">Tabelas de apoio — equipes, versões, tipos de versão e tipo de controle</p>
+  </div>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+
+<div class="aux-grid">
+
+  <!-- Equipes -->
+  <div class="aux-card">
+    <div class="aux-card-header">
+      <span class="aux-card-title">&#x1F465; Equipes</span>
+      <span class="badge badge--blue">{{len .Equipes}}</span>
+    </div>
+    <div class="aux-list">
+      {{if .Equipes}}
+        {{range .Equipes}}
+        <div class="aux-item">
+          <span>{{.Nome}}</span>
+          <form method="POST" action="/auxiliares/{{.ID}}/delete" onsubmit="return confirm('Excluir {{.Nome}}?')">
+            <button type="submit" class="aux-del-btn" title="Excluir">&#x2715;</button>
+          </form>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="aux-empty">Nenhuma equipe cadastrada.</p>
+      {{end}}
+    </div>
+    <form method="POST" action="/auxiliares" class="aux-add-form">
+      <input type="hidden" name="tipo" value="equipe">
+      <div class="aux-add-row">
+        <input name="nome" placeholder="Nome da equipe..." required>
+        <button type="submit" class="aux-add-btn">&#x2B; Adicionar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Versoes Delphi -->
+  <div class="aux-card">
+    <div class="aux-card-header">
+      <span class="aux-card-title">&#x1F4BB; Versoes Delphi</span>
+      <span class="badge badge--purple">{{len .Versoes}}</span>
+    </div>
+    <div class="aux-list">
+      {{if .Versoes}}
+        {{range .Versoes}}
+        <div class="aux-item">
+          <span class="badge badge--{{if eq .Nome "D12"}}purple{{else if eq .Nome "XE3"}}blue{{else if eq .Nome "Interbase"}}orange{{else}}teal{{end}}">{{.Nome}}</span>
+          <form method="POST" action="/auxiliares/{{.ID}}/delete" onsubmit="return confirm('Excluir {{.Nome}}?')">
+            <button type="submit" class="aux-del-btn" title="Excluir">&#x2715;</button>
+          </form>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="aux-empty">Nenhuma versao cadastrada.</p>
+      {{end}}
+    </div>
+    <form method="POST" action="/auxiliares" class="aux-add-form">
+      <input type="hidden" name="tipo" value="versao">
+      <div class="aux-add-row">
+        <input name="nome" placeholder="Ex: D13, XE5..." required>
+        <button type="submit" class="aux-add-btn">&#x2B; Adicionar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tipos de Versao -->
+  <div class="aux-card">
+    <div class="aux-card-header">
+      <span class="aux-card-title">&#x1F511; Tipos de Versão</span>
+      <span class="badge badge--orange">{{len .TiposLic}}</span>
+    </div>
+    <div class="aux-list">
+      {{if .TiposLic}}
+        {{range .TiposLic}}
+        <div class="aux-item">
+          <span>{{.Nome}}</span>
+          <form method="POST" action="/auxiliares/{{.ID}}/delete" onsubmit="return confirm('Excluir {{.Nome}}?')">
+            <button type="submit" class="aux-del-btn" title="Excluir">&#x2715;</button>
+          </form>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="aux-empty">Nenhum tipo cadastrado.</p>
+      {{end}}
+    </div>
+    <form method="POST" action="/auxiliares" class="aux-add-form">
+      <input type="hidden" name="tipo" value="tipo_lic">
+      <div class="aux-add-row">
+        <input name="nome" placeholder="Ex: Starter, Architect..." required>
+        <button type="submit" class="aux-add-btn">&#x2B; Adicionar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tipo de controle -->
+  <div class="aux-card">
+    <div class="aux-card-header">
+      <span class="aux-card-title">&#x1F4E1; Tipo de Controle</span>
+      <span class="badge badge--teal">{{len .Canais}}</span>
+    </div>
+    <div class="aux-list">
+      {{if .Canais}}
+        {{range .Canais}}
+        <div class="aux-item">
+          <span class="badge badge--{{if eq .Nome "Network"}}purple{{else}}teal{{end}}">{{.Nome}}</span>
+          <form method="POST" action="/auxiliares/{{.ID}}/delete" onsubmit="return confirm('Excluir {{.Nome}}?')">
+            <button type="submit" class="aux-del-btn" title="Excluir">&#x2715;</button>
+          </form>
+        </div>
+        {{end}}
+      {{else}}
+        <p class="aux-empty">Nenhum canal cadastrado.</p>
+      {{end}}
+    </div>
+    <form method="POST" action="/auxiliares" class="aux-add-form">
+      <input type="hidden" name="tipo" value="canal">
+      <div class="aux-add-row">
+        <input name="nome" placeholder="Ex: Subscription..." required>
+        <button type="submit" class="aux-add-btn">&#x2B; Adicionar</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{{end}}

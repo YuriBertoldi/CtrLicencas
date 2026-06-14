@@ -1,0 +1,98 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Importar / Exportar</h1>
+    <p class="page-subtitle">Exportar e importar dados via CSV</p>
+  </div>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+{{if .Sucesso}}<div class="alert alert-success">{{.Sucesso}}</div>{{end}}
+
+<div class="ie-grid">
+  <!-- Exportar -->
+  <section class="ie-section">
+    <h3>Exportar Dados</h3>
+    <p class="text-muted" style="margin-bottom:1.2rem">Baixe os dados cadastrados em formato CSV (separado por ponto-e-vírgula, compatível com Excel).</p>
+    <div class="ie-cards">
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F4BB;</div>
+        <div class="ie-card-info">
+          <strong>Desenvolvedores</strong>
+          <small class="text-muted">Nome, Equipe, Status, Obs</small>
+        </div>
+        <a href="/importexport/export?tipo=desenvolvedores" class="btn-primary">Exportar CSV</a>
+      </div>
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F511;</div>
+        <div class="ie-card-info">
+          <strong>Licenças Delphi</strong>
+          <small class="text-muted">Dev, Grupo, Versão, Serial, Tipo, Controle...</small>
+        </div>
+        <a href="/importexport/export?tipo=licencas" class="btn-primary">Exportar CSV</a>
+      </div>
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F9E9;</div>
+        <div class="ie-card-info">
+          <strong>Componentes</strong>
+          <small class="text-muted">Nome, Versão, Ferramenta, Serial, Licenciamento...</small>
+        </div>
+        <a href="/importexport/export?tipo=componentes" class="btn-primary">Exportar CSV</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Importar -->
+  <section class="ie-section">
+    <h3>Importar Dados</h3>
+    <p class="text-muted" style="margin-bottom:1.2rem">Envie um arquivo CSV com as mesmas colunas do export. A primeira linha (cabeçalho) será ignorada.</p>
+    <div class="ie-cards">
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F4BB;</div>
+        <div class="ie-card-info">
+          <strong>Importar Desenvolvedores</strong>
+          <small class="text-muted">Colunas: Nome; Equipe; Status; Obs</small>
+        </div>
+        <div class="ie-import-actions">
+          <form method="POST" action="/importexport/import" enctype="multipart/form-data">
+            <input type="hidden" name="tipo" value="desenvolvedores">
+            <input type="file" name="arquivo" accept=".csv" required>
+            <button type="submit">Importar</button>
+          </form>
+        </div>
+      </div>
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F9E9;</div>
+        <div class="ie-card-info">
+          <strong>Importar Componentes</strong>
+          <small class="text-muted">Colunas: Nome; Versão; Ferramenta; Uso; Licenciamento; Serial; Usuário; Senha; Site; Informações; Obs</small>
+        </div>
+        <div class="ie-import-actions">
+          <form method="POST" action="/importexport/import" enctype="multipart/form-data">
+            <input type="hidden" name="tipo" value="componentes">
+            <input type="file" name="arquivo" accept=".csv" required>
+            <button type="submit">Importar</button>
+          </form>
+        </div>
+      </div>
+      <div class="ie-card">
+        <div class="ie-card-icon">&#x1F511;</div>
+        <div class="ie-card-info">
+          <strong>Importar Licenças</strong>
+          <small class="text-muted">Colunas: Dev; Grupo; Versão; Serial; Tipo; Controle; Hostname; EDN Login; EDN Senha; Cad. Efetuado; Data Cad.; Obs</small>
+        </div>
+        <div class="ie-import-actions">
+          <form method="POST" action="/importexport/import" enctype="multipart/form-data">
+            <input type="hidden" name="tipo" value="licencas">
+            <input type="file" name="arquivo" accept=".csv" required>
+            <button type="submit">Importar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="ie-note">
+      <strong>Nota:</strong> Na importação de licenças, o Dev e Grupo são vinculados pelo nome. Se não forem encontrados, a licença será criada sem vínculo.
+    </div>
+  </section>
+</div>
+{{end}}

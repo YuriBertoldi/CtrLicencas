@@ -1,0 +1,266 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Componentes Delphi</h1>
+    <p class="page-subtitle">Bibliotecas e componentes de terceiros utilizados</p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/auditoria?entidade=componente" class="btn-secondary">Relatório</a>
+    <button class="btn-primary" id="btn-novo-comp">+ Novo Componente</button>
+  </div>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+
+<div class="toolbar">
+  <input type="text" id="search-comp" placeholder="Buscar por nome, uso, ferramenta..." class="search-input">
+  <select id="filter-ferr" class="filter-select">
+    <option value="">Todas as ferramentas</option>
+    {{range .Ferramentas}}<option value="{{.}}">{{.}}</option>{{end}}
+  </select>
+  <select id="filter-lic" class="filter-select">
+    <option value="">Todos os licenciamentos</option>
+    {{range .Licenciamentos}}<option value="{{.}}">{{.}}</option>{{end}}
+  </select>
+  <span id="count-comp" class="count-label"></span>
+</div>
+
+<div class="table-wrapper">
+  <table id="tbl-comp" style="min-width:750px">
+    <thead>
+      <tr>
+        <th data-sort="0">Componente <span class="sort-ico">↕</span></th>
+        <th data-sort="1">Versão <span class="sort-ico">↕</span></th>
+        <th data-sort="2">Ferramenta <span class="sort-ico">↕</span></th>
+        <th data-sort="3">Uso <span class="sort-ico">↕</span></th>
+        <th data-sort="4">Licenciamento <span class="sort-ico">↕</span></th>
+        <th data-sort="5">Serial <span class="sort-ico">↕</span></th>
+        <th class="col-actions">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Componentes}}
+      <tr>
+        <td>
+          <strong>{{.Nome}}</strong>
+          {{if .Informacoes}}<br><small class="text-muted">{{.Informacoes}}</small>{{end}}
+        </td>
+        <td>{{.Versao}}</td>
+        <td>{{.Ferramenta}}</td>
+        <td class="text-muted">{{.Uso}}</td>
+        <td>
+          <span class="badge badge--{{if eq .Licenciamento "Pago"}}orange{{else if eq .Licenciamento "Free"}}green{{else}}gray{{end}}">
+            {{if .Licenciamento}}{{.Licenciamento}}{{else}}—{{end}}
+          </span>
+        </td>
+        <td>{{if .Serial}}<code class="serial">{{.Serial}}</code>{{else}}<span class="text-muted">—</span>{{end}}</td>
+        <td class="col-actions">
+          <div class="actions-grid">
+            <button class="btn-icon btn-view" data-open-dialog="dlg-ver-comp-{{.ID}}" title="Visualizar">&#x1F441;</button>
+            <button class="btn-icon btn-edit" title="Editar" data-edit-comp
+              data-id="{{.ID}}" data-nome="{{.Nome}}" data-versao="{{.Versao}}"
+              data-ferramenta="{{.Ferramenta}}" data-licenciamento="{{.Licenciamento}}"
+              data-serial="{{.Serial}}" data-usuario="{{.Usuario}}" data-senha="{{.Senha}}"
+              data-site="{{.Site}}" data-informacoes="{{.Informacoes}}" data-uso="{{.Uso}}"
+              data-obs="{{.Obs}}">&#x270F;</button>
+            <form method="POST" action="/componentes/{{.ID}}/delete" style="display:contents"
+                  onsubmit="return confirm('Excluir {{.Nome}}?')">
+              <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Dialog: visualizar -->
+      <dialog id="dlg-ver-comp-{{.ID}}">
+        <article>
+          <header>
+            <h4>
+              <span class="badge badge--{{if eq .Licenciamento "Pago"}}orange{{else if eq .Licenciamento "Free"}}green{{else}}gray{{end}}" style="font-size:.8rem">{{if .Licenciamento}}{{.Licenciamento}}{{else}}N/D{{end}}</span>
+              {{.Nome}}
+            </h4>
+          </header>
+          <div class="data-view">
+            <div class="data-row">
+              <span class="data-label">Versão</span>
+              <span class="data-value">{{if .Versao}}{{.Versao}}{{else}}—{{end}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Ferramenta</span>
+              <span class="data-value">{{if .Ferramenta}}{{.Ferramenta}}{{else}}—{{end}}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Uso</span>
+              <span class="data-value">{{if .Uso}}{{.Uso}}{{else}}—{{end}}</span>
+            </div>
+            {{if .Serial}}
+            <div class="data-row">
+              <span class="data-label">Serial</span>
+              <span class="data-value"><code>{{.Serial}}</code></span>
+              <button class="btn-copy" data-copy="{{.Serial}}" title="Copiar">&#x1F4CB;</button>
+            </div>
+            {{end}}
+            {{if .Usuario}}
+            <div class="data-row">
+              <span class="data-label">Usuário</span>
+              <span class="data-value"><code>{{.Usuario}}</code></span>
+              <button class="btn-copy" data-copy="{{.Usuario}}" title="Copiar">&#x1F4CB;</button>
+            </div>
+            {{end}}
+            {{if .Senha}}
+            <div class="data-row">
+              <span class="data-label">Senha</span>
+              <span class="data-value"><code id="senha-comp-{{.ID}}">••••••</code></span>
+              <button class="btn-icon" style="width:26px;height:26px;font-size:.75rem" onclick="toggleCompSenha('{{.Senha}}','senha-comp-{{.ID}}')" title="Revelar">&#x1F441;</button>
+              <button class="btn-copy" data-copy="{{.Senha}}" title="Copiar senha">&#x1F4CB;</button>
+            </div>
+            {{end}}
+            {{if .Site}}
+            <div class="data-row">
+              <span class="data-label">Site</span>
+              <span class="data-value"><a href="{{.Site}}" target="_blank" style="color:var(--color-accent)">{{.Site}}</a></span>
+            </div>
+            {{end}}
+            {{if .Informacoes}}
+            <div class="data-row" style="flex-direction:column;align-items:flex-start;gap:.3rem">
+              <span class="data-label">Informações</span>
+              <span class="data-value">{{.Informacoes}}</span>
+            </div>
+            {{end}}
+            {{if .Obs}}
+            <div class="data-row">
+              <span class="data-label">Obs</span>
+              <span class="data-value">{{.Obs}}</span>
+            </div>
+            {{end}}
+          </div>
+          <footer>
+            <a href="/auditoria?entidade=componente&entidade_id={{.ID}}" class="btn-secondary" style="margin-right:auto;font-size:.8rem">Histórico</a>
+            <button type="button" data-close-dialog class="btn-secondary">Fechar</button>
+            <button class="btn-primary" data-edit-comp
+              data-id="{{.ID}}" data-nome="{{.Nome}}" data-versao="{{.Versao}}"
+              data-ferramenta="{{.Ferramenta}}" data-licenciamento="{{.Licenciamento}}"
+              data-serial="{{.Serial}}" data-usuario="{{.Usuario}}" data-senha="{{.Senha}}"
+              data-site="{{.Site}}" data-informacoes="{{.Informacoes}}" data-uso="{{.Uso}}"
+              data-obs="{{.Obs}}">Editar</button>
+          </footer>
+        </article>
+      </dialog>
+
+      {{end}}
+    </tbody>
+  </table>
+  <p id="no-comp" style="display:none" class="no-results">Nenhum componente encontrado.</p>
+</div>
+
+<div class="legenda-grid">
+  <div class="legenda-item"><span class="badge badge--orange">Pago</span> Licença comercial adquirida</div>
+  <div class="legenda-item"><span class="badge badge--green">Free</span> Software gratuito / open source</div>
+  <div class="legenda-item"><span class="badge badge--gray">—</span> Sem informação de licenciamento</div>
+</div>
+
+<!-- Dialog unificado: criar / editar componente -->
+<dialog id="dlg-comp">
+  <article>
+    <header><h4 id="dlg-comp-title">Novo Componente Delphi</h4></header>
+    <form id="dlg-comp-form" method="POST" action="/componentes">
+      <div class="form-grid-2">
+        <label>Nome * <input name="nome" id="comp-nome" required placeholder="FastReports, TMS Component Pack..."></label>
+        <label>Versão <input name="versao" id="comp-versao" placeholder="8.3"></label>
+        <label>Ferramenta
+          <input name="ferramenta" id="comp-ferramenta" list="ferramentas-list" placeholder="Delphi 7, XE3, D12...">
+          <datalist id="ferramentas-list">
+            {{range .Ferramentas}}<option value="{{.}}">{{end}}
+          </datalist>
+        </label>
+        <label>Licenciamento
+          <select name="licenciamento" id="comp-licenciamento">
+            <option value="">Não definido</option>
+            {{range .Licenciamentos}}<option value="{{.}}">{{.}}</option>{{end}}
+          </select>
+        </label>
+        <label>Serial <input name="serial" id="comp-serial" placeholder="Chave de licença"></label>
+        <label>Usuário <input name="usuario" id="comp-usuario" placeholder="Login de acesso"></label>
+        <label>Senha <input name="senha" id="comp-senha" placeholder="Senha de acesso"></label>
+        <label>Site <input name="site" id="comp-site" placeholder="https://..."></label>
+      </div>
+      <label>Informações <textarea name="informacoes" id="comp-informacoes" rows="2" placeholder="Descrição do componente"></textarea></label>
+      <label>Uso <input name="uso" id="comp-uso" placeholder="Linha Phoenix Completa, G5, Contábil..."></label>
+      <label>Obs <textarea name="obs" id="comp-obs" rows="2"></textarea></label>
+      <footer>
+        <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary" id="dlg-comp-submit">Cadastrar</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+
+<script>
+  initTableFilter({
+    tableId: 'tbl-comp',
+    searchId: 'search-comp',
+    filters: [
+      { id: 'filter-ferr', col: 2 },
+      { id: 'filter-lic',  col: 4 },
+    ],
+    noResultsId: 'no-comp',
+    countId: 'count-comp',
+  });
+  initTableSort('tbl-comp');
+
+  function toggleCompSenha(senha, elId) {
+    const el = document.getElementById(elId);
+    el.textContent = el.textContent === '••••••' ? senha : '••••••';
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-copy');
+    if (!btn) return;
+    const text = btn.dataset.copy || '';
+    navigator.clipboard.writeText(text).then(function() {
+      const orig = btn.innerHTML;
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+
+  // Dialog unificado componente
+  var dlgComp = document.getElementById('dlg-comp');
+  var dlgCompForm = document.getElementById('dlg-comp-form');
+
+  document.getElementById('btn-novo-comp').addEventListener('click', function() {
+    document.getElementById('dlg-comp-title').textContent = 'Novo Componente Delphi';
+    document.getElementById('dlg-comp-submit').textContent = 'Cadastrar';
+    dlgCompForm.action = '/componentes';
+    dlgCompForm.reset();
+    dlgComp.showModal();
+  });
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-edit-comp]');
+    if (!btn) return;
+    var d = btn.dataset;
+    var parentDlg = btn.closest('dialog');
+    if (parentDlg) parentDlg.close();
+
+    document.getElementById('dlg-comp-title').textContent = 'Editar — ' + d.nome;
+    document.getElementById('dlg-comp-submit').textContent = 'Salvar';
+    dlgCompForm.action = '/componentes/' + d.id + '/update';
+
+    document.getElementById('comp-nome').value = d.nome || '';
+    document.getElementById('comp-versao').value = d.versao || '';
+    document.getElementById('comp-ferramenta').value = d.ferramenta || '';
+    document.getElementById('comp-licenciamento').value = d.licenciamento || '';
+    document.getElementById('comp-serial').value = d.serial || '';
+    document.getElementById('comp-usuario').value = d.usuario || '';
+    document.getElementById('comp-senha').value = d.senha || '';
+    document.getElementById('comp-site').value = d.site || '';
+    document.getElementById('comp-informacoes').value = d.informacoes || '';
+    document.getElementById('comp-uso').value = d.uso || '';
+    document.getElementById('comp-obs').value = d.obs || '';
+
+    dlgComp.showModal();
+  });
+</script>
+{{end}}

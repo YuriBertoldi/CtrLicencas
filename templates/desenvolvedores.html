@@ -1,0 +1,142 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Desenvolvedores</h1>
+    <p class="page-subtitle">Cadastro de devs e suas equipes</p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/auditoria?entidade=dev" class="btn-secondary">Relatório</a>
+    <button class="btn-primary" id="btn-novo-dev">+ Novo Dev</button>
+  </div>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+{{if .Sucesso}}<div class="alert alert-success">{{.Sucesso}}</div>{{end}}
+
+<div class="toolbar">
+  <input type="text" id="search-devs" placeholder="Buscar por nome, equipe..." class="search-input">
+  <select id="filter-equipe" class="filter-select">
+    <option value="">Todas as equipes</option>
+    {{range .Equipes}}<option value="{{.}}">{{.}}</option>{{end}}
+  </select>
+  <select id="filter-status" class="filter-select">
+    <option value="">Todos os status</option>
+    <option value="ativo">Ativo</option>
+    <option value="livre">Livre</option>
+    <option value="inativo">Inativo</option>
+  </select>
+  <span id="count-devs" class="count-label"></span>
+</div>
+
+<div class="table-wrapper">
+  <table id="tbl-devs" style="min-width:760px">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th data-sort="1">Nome <span class="sort-ico">↕</span></th>
+        <th data-sort="2">Equipe <span class="sort-ico">↕</span></th>
+        <th data-sort="3">Status <span class="sort-ico">↕</span></th>
+        <th>Obs</th>
+        <th>Licenças</th>
+        <th class="col-actions">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Devs}}
+      <tr>
+        <td class="col-id">{{.ID}}</td>
+        <td><strong>{{.Nome}}</strong></td>
+        <td>{{.Equipe}}</td>
+        <td>
+          <span class="badge badge--{{if eq .Status "ativo"}}green{{else if eq .Status "livre"}}blue{{else}}gray{{end}}">
+            {{statusLabel .Status}}
+          </span>
+        </td>
+        <td class="text-muted">{{.Obs}}</td>
+        <td>
+          <a href="/licencas?dev_id={{.ID}}" class="btn-sm">Ver</a>
+        </td>
+        <td class="col-actions">
+          <button class="btn-icon btn-edit" title="Editar" data-edit-dev
+            data-id="{{.ID}}" data-nome="{{.Nome}}" data-equipe="{{.Equipe}}"
+            data-status="{{.Status}}" data-obs="{{.Obs}}">&#x270F;</button>
+          <form method="POST" action="/desenvolvedores/{{.ID}}/delete" style="display:inline"
+                onsubmit="return confirm('Excluir {{.Nome}}? As licenças vinculadas serão desvinculadas e ficarão livres.')">
+            <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
+          </form>
+        </td>
+      </tr>
+
+      {{end}}
+    </tbody>
+  </table>
+  <p id="no-devs" style="display:none" class="no-results">Nenhum desenvolvedor encontrado.</p>
+</div>
+
+<!-- Dialog unificado: criar / editar dev -->
+<dialog id="dlg-dev">
+  <article>
+    <header><h4 id="dlg-dev-title">Novo Desenvolvedor</h4></header>
+    <form id="dlg-dev-form" method="POST" action="/desenvolvedores">
+      <label>Nome * <input name="nome" id="dev-nome" required></label>
+      <label>Equipe
+        <select name="equipe" id="dev-equipe">
+          <option value="">— Nenhuma —</option>
+          {{range .Equipes}}<option value="{{.}}">{{.}}</option>{{end}}
+        </select>
+      </label>
+      <label>Status
+        <select name="status" id="dev-status">
+          <option value="ativo">Ativo</option>
+          <option value="livre">Livre</option>
+          <option value="inativo">Inativo</option>
+        </select>
+      </label>
+      <label>Obs <textarea name="obs" id="dev-obs" rows="2"></textarea></label>
+      <footer>
+        <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary" id="dlg-dev-submit">Cadastrar</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+
+<script>
+  initTableFilter({
+    tableId: 'tbl-devs',
+    searchId: 'search-devs',
+    filters: [
+      { id: 'filter-equipe', col: 2 },
+      { id: 'filter-status', col: 3 },
+    ],
+    noResultsId: 'no-devs',
+    countId: 'count-devs',
+  });
+  initTableSort('tbl-devs');
+
+  var dlgDev = document.getElementById('dlg-dev');
+  var dlgDevForm = document.getElementById('dlg-dev-form');
+
+  document.getElementById('btn-novo-dev').addEventListener('click', function() {
+    document.getElementById('dlg-dev-title').textContent = 'Novo Desenvolvedor';
+    document.getElementById('dlg-dev-submit').textContent = 'Cadastrar';
+    dlgDevForm.action = '/desenvolvedores';
+    dlgDevForm.reset();
+    dlgDev.showModal();
+  });
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-edit-dev]');
+    if (!btn) return;
+    var d = btn.dataset;
+    document.getElementById('dlg-dev-title').textContent = 'Editar Dev — ' + d.nome;
+    document.getElementById('dlg-dev-submit').textContent = 'Salvar';
+    dlgDevForm.action = '/desenvolvedores/' + d.id + '/update';
+    document.getElementById('dev-nome').value = d.nome || '';
+    document.getElementById('dev-equipe').value = d.equipe || '';
+    document.getElementById('dev-status').value = d.status || 'ativo';
+    document.getElementById('dev-obs').value = d.obs || '';
+    dlgDev.showModal();
+  });
+</script>
+{{end}}

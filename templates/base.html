@@ -1,0 +1,206 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b12">
+  <title>{{.Title}} — delphiLic</title>
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="has-sidebar">
+
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="/" class="brand-link">
+        <span class="brand-icon">D</span>
+        <div class="brand-text">
+          <strong>delphiLic</strong>
+          <small>Controle de Licenças</small>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-section-label">Menu</p>
+      <a href="/" class="nav-item {{if eq .Active "dashboard"}}active{{end}}">
+        <span class="nav-ico">&#x1F4CA;</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a href="/desenvolvedores" class="nav-item {{if eq .Active "desenvolvedores"}}active{{end}}">
+        <span class="nav-ico">&#x1F4BB;</span>
+        <span class="nav-text">Desenvolvedores</span>
+      </a>
+      <a href="/licencas" class="nav-item {{if eq .Active "licencas"}}active{{end}}">
+        <span class="nav-ico">&#x1F511;</span>
+        <span class="nav-text">Licenças Delphi</span>
+      </a>
+      <a href="/componentes" class="nav-item {{if eq .Active "componentes"}}active{{end}}">
+        <span class="nav-ico">&#x1F9E9;</span>
+        <span class="nav-text">Componentes</span>
+      </a>
+
+      <p class="nav-section-label">Configuração</p>
+      <a href="/auxiliares" class="nav-item {{if eq .Active "auxiliares"}}active{{end}}">
+        <span class="nav-ico">&#x2699;</span>
+        <span class="nav-text">Auxiliares</span>
+      </a>
+      <a href="/auditoria" class="nav-item {{if eq .Active "auditoria"}}active{{end}}">
+        <span class="nav-ico">&#x1F4DC;</span>
+        <span class="nav-text">Auditoria</span>
+      </a>
+      <a href="/importexport" class="nav-item {{if eq .Active "importexport"}}active{{end}}">
+        <span class="nav-ico">&#x1F4E5;</span>
+        <span class="nav-text">Importar / Exportar</span>
+      </a>
+
+      {{if and .CurrentUser .CurrentUser.Admin}}
+      <p class="nav-section-label">Administracao</p>
+      <a href="/usuarios" class="nav-item {{if eq .Active "usuarios"}}active{{end}}">
+        <span class="nav-ico">&#x1F464;</span>
+        <span class="nav-text">Usuarios</span>
+      </a>
+      {{end}}
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-btns">
+        <button class="icon-btn theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Alternar tema">&#x1F319;</button>
+      </div>
+      {{if .CurrentUser}}
+      <div class="user-chip">
+        <div class="user-avatar">{{slice .CurrentUser.Nome 0 1}}</div>
+        <div class="user-meta">
+          <span class="user-nome">{{.CurrentUser.Nome}}</span>
+          {{if .CurrentUser.Admin}}
+            <span class="user-role">Admin</span>
+          {{else}}
+            <span class="user-role-user">Operador</span>
+          {{end}}
+        </div>
+        <form method="POST" action="/logout" style="display:inline;margin:0">
+          <button type="submit" class="icon-btn icon-btn-danger" title="Sair">&#x21A9;</button>
+        </form>
+      </div>
+      {{end}}
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <script>
+    function initTableFilter(cfg) {
+      const tbody = document.querySelector('#' + cfg.tableId + ' tbody');
+      if (!tbody) return;
+      const searchEl = cfg.searchId ? document.getElementById(cfg.searchId) : null;
+      const filterEls = (cfg.filters || []).map(f => ({ el: document.getElementById(f.id), col: f.col })).filter(f => f.el);
+      function dataRows() { return Array.from(tbody.querySelectorAll('tr')).filter(r => r.cells.length > 1); }
+      function apply() {
+        const query = searchEl?.value.trim().toLowerCase() || '';
+        let count = 0;
+        dataRows().forEach(row => {
+          let show = true;
+          if (query) {
+            const text = Array.from(row.cells).map(c => c.textContent.trim()).join(' ').toLowerCase();
+            if (!text.includes(query)) show = false;
+          }
+          if (show) {
+            for (const {el, col} of filterEls) {
+              if (!el.value) continue;
+              const cellText = (row.cells[col]?.textContent || '').trim().toLowerCase();
+              if (!cellText.includes(el.value.toLowerCase())) { show = false; break; }
+            }
+          }
+          row.style.display = show ? '' : 'none';
+          if (show) count++;
+        });
+        const noRes = cfg.noResultsId ? document.getElementById(cfg.noResultsId) : null;
+        const rows = dataRows();
+        if (noRes) noRes.style.display = (rows.length > 0 && count === 0) ? 'block' : 'none';
+        const counter = cfg.countId ? document.getElementById(cfg.countId) : null;
+        if (counter) counter.textContent = rows.length > 0 ? count + ' de ' + rows.length : '';
+      }
+      searchEl?.addEventListener('input', apply);
+      filterEls.forEach(({el}) => el.addEventListener('change', apply));
+    }
+
+    function initTableSort(tableId) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      let sortCol = -1, sortAsc = true;
+      table.querySelectorAll('thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+          const col = parseInt(this.dataset.sort);
+          sortAsc = (sortCol === col) ? !sortAsc : true;
+          sortCol = col;
+          table.querySelectorAll('thead th[data-sort] .sort-ico').forEach(i => i.textContent = '↕');
+          const ico = this.querySelector('.sort-ico');
+          if (ico) ico.textContent = sortAsc ? '↑' : '↓';
+          const tbody = table.querySelector('tbody');
+          const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.cells.length > 1);
+          rows.sort((a, b) => {
+            const av = (a.cells[col]?.textContent || '').trim().toLowerCase();
+            const bv = (b.cells[col]?.textContent || '').trim().toLowerCase();
+            return sortAsc ? av.localeCompare(bv, 'pt') : bv.localeCompare(av, 'pt');
+          });
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    }
+  </script>
+
+  <main class="app-main">
+    <div class="app-container">
+      {{template "content" .}}
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      document.getElementById('theme-btn').textContent = next === 'dark' ? '\u{1F319}' : '\u2600\uFE0F';
+    }
+    (function() {
+      var t = localStorage.getItem('theme') || 'dark';
+      var btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = t === 'dark' ? '\u{1F319}' : '\u2600\uFE0F';
+    })();
+
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const toggle = document.getElementById('sidebar-toggle');
+    function openSidebar() { sidebar.classList.add('open'); backdrop.classList.add('show'); toggle?.classList.add('is-open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('show'); toggle?.classList.remove('is-open'); }
+    toggle?.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    backdrop?.addEventListener('click', closeSidebar);
+    document.querySelectorAll('.nav-item').forEach(a => a.addEventListener('click', closeSidebar));
+
+    // Dialog helper
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-open-dialog]');
+      if (btn) document.getElementById(btn.getAttribute('data-open-dialog'))?.showModal();
+      const close = e.target.closest('[data-close-dialog]');
+      if (close) close.closest('dialog')?.close();
+    });
+  </script>
+</body>
+</html>
+{{end}}

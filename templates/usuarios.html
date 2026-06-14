@@ -1,0 +1,91 @@
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Usuarios do Sistema</h1>
+    <p class="page-subtitle">Gerenciamento de acesso ao delphiLic</p>
+  </div>
+  <button class="btn-primary" data-open-dialog="dlg-novo-user">+ Novo Usuario</button>
+</div>
+
+{{if .Erro}}<div class="alert alert-error">{{.Erro}}</div>{{end}}
+{{if .Sucesso}}<div class="alert alert-success">{{.Sucesso}}</div>{{end}}
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Admin</th>
+        <th>Ativo</th>
+        <th>Criado em</th>
+        <th class="col-actions">Acoes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Usuarios}}
+      <tr>
+        <td class="col-id">{{.ID}}</td>
+        <td><strong>{{.Nome}}</strong></td>
+        <td>{{.Email}}</td>
+        <td>
+          {{if .Admin}}<span class="badge badge--purple">Sim</span>
+          {{else}}<span class="badge badge--gray">Nao</span>{{end}}
+        </td>
+        <td>
+          {{if .Ativo}}<span class="badge badge--green">Ativo</span>
+          {{else}}<span class="badge badge--orange">Inativo</span>{{end}}
+        </td>
+        <td>{{date .CriadoEm}}</td>
+        <td class="col-actions">
+          <form method="POST" action="/usuarios/{{.ID}}/toggle-ativo" style="display:inline">
+            <button type="submit" class="btn-sm">
+              {{if .Ativo}}Desativar{{else}}Ativar{{end}}
+            </button>
+          </form>
+          <form method="POST" action="/usuarios/{{.ID}}/toggle-admin" style="display:inline">
+            <button type="submit" class="btn-sm">
+              {{if .Admin}}Remover Admin{{else}}Tornar Admin{{end}}
+            </button>
+          </form>
+          <button class="btn-sm" data-open-dialog="dlg-reset-{{.ID}}">Reset Senha</button>
+        </td>
+      </tr>
+
+      <dialog id="dlg-reset-{{.ID}}">
+        <article>
+          <header><h4>Reset de Senha — {{.Nome}}</h4></header>
+          <form method="POST" action="/usuarios/{{.ID}}/reset-senha">
+            <label>Nova Senha <input type="password" name="nova_senha" required placeholder="min 6 caracteres"></label>
+            <footer>
+              <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+              <button type="submit" class="btn-primary">Confirmar</button>
+            </footer>
+          </form>
+        </article>
+      </dialog>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+<!-- Dialog: novo usuario -->
+<dialog id="dlg-novo-user">
+  <article>
+    <header><h4>Novo Usuario</h4></header>
+    <form method="POST" action="/usuarios">
+      <label>Nome * <input name="nome" required autofocus></label>
+      <label>Email * <input type="email" name="email" required></label>
+      <label>Senha * <input type="password" name="senha" required placeholder="min 6 caracteres"></label>
+      <label>
+        <input type="checkbox" name="admin" value="true"> Admin
+      </label>
+      <footer>
+        <button type="button" data-close-dialog class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary">Cadastrar</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+{{end}}

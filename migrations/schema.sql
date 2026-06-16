@@ -1,9 +1,9 @@
 -- ============================================================
--- delphiLic — Schema de referência
+-- CtrlLicença — Schema de referência
 -- As migrations reais rodam via RunMigrations() ao subir.
 -- ============================================================
 
--- Desenvolvedores Delphi
+-- Desenvolvedores
 CREATE TABLE devs (
     id        SERIAL PRIMARY KEY,
     nome      VARCHAR(120) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE devs (
     criado_em TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- Licenças Delphi por desenvolvedor (XE3, D12, Interbase, HTML5Builder, etc.)
+-- Licenças por desenvolvedor (XE3, D12, Interbase, HTML5Builder, etc.)
 CREATE TABLE licencas (
     id             SERIAL PRIMARY KEY,
     dev_id         INTEGER      NOT NULL REFERENCES devs(id) ON DELETE CASCADE,
@@ -41,12 +41,12 @@ CREATE TABLE licencas_network (
     criado_em   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- Componentes Delphi (TMS, FastReport, ACBR, etc.)
+-- Componentes (TMS, FastReport, ACBR, etc.)
 CREATE TABLE componentes (
     id           SERIAL PRIMARY KEY,
     nome         VARCHAR(120) NOT NULL,
     versao       VARCHAR(60)  NOT NULL DEFAULT '',
-    ferramenta   VARCHAR(60)  NOT NULL DEFAULT '', -- Delphi 7 | XE3 | D12 | etc.
+    ferramenta   VARCHAR(60)  NOT NULL DEFAULT '',
     informacoes  TEXT         NOT NULL DEFAULT '',
     uso          VARCHAR(200) NOT NULL DEFAULT '',
     licenciamento VARCHAR(30) NOT NULL DEFAULT '', -- Pago | Free | Pago Por uso

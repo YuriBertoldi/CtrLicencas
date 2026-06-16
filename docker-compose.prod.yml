@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  app:
+    image: ctrllicenca:prod
+    restart: unless-stopped
+    environment:
+      PORT: 8081
+      DATABASE_URL: postgres://delphilic:delphilic@finbertoldi-postgres-1:5432/delphilic?sslmode=disable
+      ADMIN_EMAIL: admin@ctrllicenca.local
+      ADMIN_SENHA: admin123
+    ports:
+      - "8081:8081"
+    networks:
+      - finbertoldi_default
+
+networks:
+  finbertoldi_default:
+    external: true

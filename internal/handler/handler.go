@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"delphilic/internal/auth"
-	"delphilic/internal/models"
-	"delphilic/internal/store"
+	"ctrllicenca/internal/auth"
+	"ctrllicenca/internal/models"
+	"ctrllicenca/internal/store"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -351,7 +351,7 @@ func HandleLicencas(db *sql.DB) http.HandlerFunc {
 			canais = []string{"EDN", "Network"}
 		}
 		render(w, "licencas", models.LicencasPage{
-			BasePage: basePage(db, r, "licencas", "Licencas Delphi"),
+			BasePage: basePage(db, r, "licencas", "Licenças"),
 			Licencas: licencas,
 			Devs:     devs,
 			Grupos:   grupos,
@@ -580,7 +580,7 @@ func HandleComponentes(db *sql.DB) http.HandlerFunc {
 		comps, _ := store.ListComponentes(db)
 		ferramentas := store.ListFerramentas(db)
 		render(w, "componentes", models.ComponentesPage{
-			BasePage:       basePage(db, r, "componentes", "Componentes Delphi"),
+			BasePage:       basePage(db, r, "componentes", "Componentes"),
 			Componentes:    comps,
 			Ferramentas:    ferramentas,
 			Licenciamentos: []string{"Pago", "Free", "Pago Por uso"},
@@ -819,9 +819,14 @@ func HandleImportExport(db *sql.DB) http.HandlerFunc {
 func HandleExportCSV(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tipo := r.URL.Query().Get("tipo")
+		modelo := r.URL.Query().Get("modelo") == "true"
 
+		filename := tipo
+		if modelo {
+			filename = "modelo_" + tipo
+		}
 		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.csv", tipo))
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.csv", filename))
 		w.Write([]byte("\xEF\xBB\xBF"))
 
 		cw := csv.NewWriter(w)
@@ -830,29 +835,35 @@ func HandleExportCSV(db *sql.DB) http.HandlerFunc {
 		switch tipo {
 		case "desenvolvedores":
 			cw.Write([]string{"Nome", "Equipe", "Status", "Obs"})
-			devs, _ := store.ListDevs(db)
-			for _, d := range devs {
-				cw.Write([]string{d.Nome, d.Equipe, d.Status, d.Obs})
+			if !modelo {
+				devs, _ := store.ListDevs(db)
+				for _, d := range devs {
+					cw.Write([]string{d.Nome, d.Equipe, d.Status, d.Obs})
+				}
 			}
 		case "licencas":
 			cw.Write([]string{"Dev", "Grupo", "Versão", "Serial", "Tipo", "Controle", "Hostname", "EDN Login", "EDN Senha", "Cad. Efetuado", "Data Cad.", "Obs"})
-			lics, _ := store.ListLicencas(db)
-			for _, l := range lics {
-				cadEfetuado := "Não"
-				if l.CadEfetuado {
-					cadEfetuado = "Sim"
+			if !modelo {
+				lics, _ := store.ListLicencas(db)
+				for _, l := range lics {
+					cadEfetuado := "Não"
+					if l.CadEfetuado {
+						cadEfetuado = "Sim"
+					}
+					dataCad := ""
+					if l.DataCad != nil {
+						dataCad = l.DataCad.Format("02/01/2006")
+					}
+					cw.Write([]string{l.DevNome, l.GrupoNome, l.Versao, l.Serial, l.Tipo, l.Canal, l.Hostname, l.EdnLogin, l.EdnSenha, cadEfetuado, dataCad, l.Obs})
 				}
-				dataCad := ""
-				if l.DataCad != nil {
-					dataCad = l.DataCad.Format("02/01/2006")
-				}
-				cw.Write([]string{l.DevNome, l.GrupoNome, l.Versao, l.Serial, l.Tipo, l.Canal, l.Hostname, l.EdnLogin, l.EdnSenha, cadEfetuado, dataCad, l.Obs})
 			}
 		case "componentes":
 			cw.Write([]string{"Nome", "Versão", "Ferramenta", "Uso", "Licenciamento", "Serial", "Usuário", "Senha", "Site", "Informações", "Obs"})
-			comps, _ := store.ListComponentes(db)
-			for _, c := range comps {
-				cw.Write([]string{c.Nome, c.Versao, c.Ferramenta, c.Uso, c.Licenciamento, c.Serial, c.Usuario, c.Senha, c.Site, c.Informacoes, c.Obs})
+			if !modelo {
+				comps, _ := store.ListComponentes(db)
+				for _, c := range comps {
+					cw.Write([]string{c.Nome, c.Versao, c.Ferramenta, c.Uso, c.Licenciamento, c.Serial, c.Usuario, c.Senha, c.Site, c.Informacoes, c.Obs})
+				}
 			}
 		default:
 			http.Error(w, "Tipo inválido", http.StatusBadRequest)

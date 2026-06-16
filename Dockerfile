@@ -3,12 +3,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o delphilic .
+RUN go build -o ctrllicenca .
 
 FROM alpine:3.19
 WORKDIR /app
-COPY --from=builder /app/delphilic .
+COPY --from=builder /app/ctrllicenca .
 COPY templates/ templates/
 COPY static/ static/
 EXPOSE 8081
-CMD ["./delphilic"]
+CMD ["./ctrllicenca"]

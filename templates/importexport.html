@@ -26,7 +26,7 @@
       <div class="ie-card">
         <div class="ie-card-icon">&#x1F511;</div>
         <div class="ie-card-info">
-          <strong>Licenças Delphi</strong>
+          <strong>Licenças</strong>
           <small class="text-muted">Dev, Grupo, Versão, Serial, Tipo, Controle...</small>
         </div>
         <a href="/importexport/export?tipo=licencas" class="btn-primary">Exportar CSV</a>
@@ -42,7 +42,8 @@
     </div>
   </section>
 
-  <!-- Importar -->
+  <!-- Importar (admin only) -->
+  {{if .CurrentUser.Admin}}
   <section class="ie-section">
     <h3>Importar Dados</h3>
     <p class="text-muted" style="margin-bottom:1.2rem">Envie um arquivo CSV com as mesmas colunas do export. A primeira linha (cabeçalho) será ignorada.</p>
@@ -53,6 +54,7 @@
           <strong>Importar Desenvolvedores</strong>
           <small class="text-muted">Colunas: Nome; Equipe; Status; Obs</small>
         </div>
+        <a href="/importexport/export?tipo=desenvolvedores&modelo=true" class="btn-secondary">Baixar Modelo</a>
         <div class="ie-import-actions">
           <form method="POST" action="/importexport/import" enctype="multipart/form-data">
             <input type="hidden" name="tipo" value="desenvolvedores">
@@ -67,6 +69,7 @@
           <strong>Importar Componentes</strong>
           <small class="text-muted">Colunas: Nome; Versão; Ferramenta; Uso; Licenciamento; Serial; Usuário; Senha; Site; Informações; Obs</small>
         </div>
+        <a href="/importexport/export?tipo=componentes&modelo=true" class="btn-secondary">Baixar Modelo</a>
         <div class="ie-import-actions">
           <form method="POST" action="/importexport/import" enctype="multipart/form-data">
             <input type="hidden" name="tipo" value="componentes">
@@ -81,6 +84,7 @@
           <strong>Importar Licenças</strong>
           <small class="text-muted">Colunas: Dev; Grupo; Versão; Serial; Tipo; Controle; Hostname; EDN Login; EDN Senha; Cad. Efetuado; Data Cad.; Obs</small>
         </div>
+        <a href="/importexport/export?tipo=licencas&modelo=true" class="btn-secondary">Baixar Modelo</a>
         <div class="ie-import-actions">
           <form method="POST" action="/importexport/import" enctype="multipart/form-data">
             <input type="hidden" name="tipo" value="licencas">
@@ -94,5 +98,6 @@
       <strong>Nota:</strong> Na importação de licenças, o Dev e Grupo são vinculados pelo nome. Se não forem encontrados, a licença será criada sem vínculo.
     </div>
   </section>
+  {{end}}
 </div>
 {{end}}

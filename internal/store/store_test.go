@@ -16,7 +16,7 @@ func testDB(t *testing.T) *sql.DB {
 	t.Helper()
 	dsn := os.Getenv("TEST_DATABASE_URL")
 	if dsn == "" {
-		dsn = "postgres://delphilic:delphilic@localhost:5433/delphilic?sslmode=disable"
+		dsn = "postgres://ctrllicenca:ctrllicenca@localhost:5433/ctrllicenca?sslmode=disable"
 	}
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

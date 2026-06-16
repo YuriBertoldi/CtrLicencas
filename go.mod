@@ -1,4 +1,4 @@
-module delphilic
+module ctrllicenca
 
 go 1.24.0
 

@@ -1,8 +1,8 @@
 {{define "content"}}
 <div class="page-header">
   <div>
-    <h1>Componentes Delphi</h1>
-    <p class="page-subtitle">Bibliotecas e componentes de terceiros utilizados</p>
+    <h1>Componentes</h1>
+    <p class="page-subtitle">Catálogo de componentes e bibliotecas de terceiros</p>
   </div>
   <div style="display:flex;gap:.5rem">
     <a href="/auditoria?entidade=componente" class="btn-secondary">Relatório</a>
@@ -162,13 +162,13 @@
 <!-- Dialog unificado: criar / editar componente -->
 <dialog id="dlg-comp">
   <article>
-    <header><h4 id="dlg-comp-title">Novo Componente Delphi</h4></header>
+    <header><h4 id="dlg-comp-title">Novo Componente</h4></header>
     <form id="dlg-comp-form" method="POST" action="/componentes">
       <div class="form-grid-2">
         <label>Nome * <input name="nome" id="comp-nome" required placeholder="FastReports, TMS Component Pack..."></label>
         <label>Versão <input name="versao" id="comp-versao" placeholder="8.3"></label>
         <label>Ferramenta
-          <input name="ferramenta" id="comp-ferramenta" list="ferramentas-list" placeholder="Delphi 7, XE3, D12...">
+          <input name="ferramenta" id="comp-ferramenta" list="ferramentas-list" placeholder="Ex: Visual Studio, IntelliJ...">
           <datalist id="ferramentas-list">
             {{range .Ferramentas}}<option value="{{.}}">{{end}}
           </datalist>
@@ -230,7 +230,7 @@
   var dlgCompForm = document.getElementById('dlg-comp-form');
 
   document.getElementById('btn-novo-comp').addEventListener('click', function() {
-    document.getElementById('dlg-comp-title').textContent = 'Novo Componente Delphi';
+    document.getElementById('dlg-comp-title').textContent = 'Novo Componente';
     document.getElementById('dlg-comp-submit').textContent = 'Cadastrar';
     dlgCompForm.action = '/componentes';
     dlgCompForm.reset();

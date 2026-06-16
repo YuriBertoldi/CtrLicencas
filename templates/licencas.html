@@ -1,13 +1,15 @@
 {{define "content"}}
 <div class="page-header">
   <div>
-    <h1>Licenças Delphi</h1>
-    <p class="page-subtitle">Cadastro de seriais — XE3, D12, Interbase, HTML5Builder</p>
+    <h1>Licenças</h1>
+    <p class="page-subtitle">Cadastro e gestão de seriais e licenças</p>
   </div>
   <div style="display:flex;gap:.5rem">
     <a href="/auditoria?entidade=licenca" class="btn-secondary">Relatório</a>
+    {{if .CurrentUser.Admin}}
     <button class="btn-secondary" data-open-dialog="dlg-grupos">Grupos</button>
     <button class="btn-primary" id="btn-nova-lic">+ Nova Licença</button>
+    {{end}}
   </div>
 </div>
 
@@ -39,11 +41,11 @@
 </div>
 
 <div class="table-wrapper">
-  <table id="tbl-lic" style="min-width:920px">
+  <table id="tbl-lic" style="min-width:900px">
     <thead>
       <tr>
         <th data-sort="0">Desenvolvedor <span class="sort-ico">↕</span></th>
-        <th data-sort="1">Versão <span class="sort-ico">↕</span></th>
+        <th data-sort="1" class="col-versao">Versão <span class="sort-ico">↕</span></th>
         <th data-sort="2">Serial <span class="sort-ico">↕</span></th>
         <th data-sort="3">Tipo <span class="sort-ico">↕</span></th>
         <th data-sort="4">Controle <span class="sort-ico">↕</span></th>
@@ -82,6 +84,7 @@
           <div class="actions-grid">
             <button class="btn-icon btn-view" data-open-dialog="dlg-ver-lic-{{.ID}}" title="Ver dados">&#x1F441;</button>
             <button class="btn-icon btn-link" data-open-dialog="dlg-vincular-{{.ID}}" title="Vincular dev">&#x1F517;</button>
+            {{if $.CurrentUser.Admin}}
             <button class="btn-icon btn-edit" title="Editar"
             data-edit-lic
             data-id="{{.ID}}" data-serial="{{.Serial}}" data-versao="{{.Versao}}"
@@ -92,6 +95,7 @@
             <form method="POST" action="/licencas/{{.ID}}/delete" onsubmit="return confirm('Excluir esta licença?')">
               <button type="submit" class="btn-icon btn-del" title="Excluir">&#x1F5D1;</button>
             </form>
+            {{end}}
           </div>
         </td>
       </tr>
@@ -163,12 +167,14 @@
           <footer>
             <a href="/auditoria?entidade=licenca&entidade_id={{.ID}}" class="btn-secondary" style="margin-right:auto;font-size:.8rem">Histórico</a>
             <button type="button" data-close-dialog class="btn-secondary">Fechar</button>
+            {{if $.CurrentUser.Admin}}
             <button class="btn-primary" data-edit-lic
               data-id="{{.ID}}" data-serial="{{.Serial}}" data-versao="{{.Versao}}"
               data-tipo="{{.Tipo}}" data-canal="{{.Canal}}" data-dev-id="{{derefInt .DevID}}"
               data-hostname="{{.Hostname}}" data-edn-login="{{.EdnLogin}}" data-edn-senha="{{.EdnSenha}}"
               data-cad-efetuado="{{.CadEfetuado}}" data-data-cad="{{dateInput .DataCad}}"
               data-obs="{{.Obs}}" data-grupo-id="{{derefInt .GrupoID}}">Editar</button>
+            {{end}}
           </footer>
         </article>
       </dialog>
@@ -207,7 +213,7 @@
 <!-- Dialog unificado: criar / editar licença -->
 <dialog id="dlg-lic">
   <article>
-    <header><h4 id="dlg-lic-title">Nova Licença Delphi</h4></header>
+    <header><h4 id="dlg-lic-title">Nova Licença</h4></header>
     <form id="dlg-lic-form" method="POST" action="/licencas">
       <div class="form-grid-2">
         <label>Serial <input name="serial" id="lic-serial" placeholder="XXXX-XXXXXXXX-XXXXXXXX-XXXX"></label>
@@ -338,7 +344,7 @@
   var dlgLicForm = document.getElementById('dlg-lic-form');
 
   function openNewLic() {
-    document.getElementById('dlg-lic-title').textContent = 'Nova Licença Delphi';
+    document.getElementById('dlg-lic-title').textContent = 'Nova Licença';
     document.getElementById('dlg-lic-submit').textContent = 'Cadastrar';
     dlgLicForm.action = '/licencas';
     dlgLicForm.reset();

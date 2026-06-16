@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"delphilic/internal/auth"
-	"delphilic/internal/handler"
-	"delphilic/internal/store"
+	"ctrllicenca/internal/auth"
+	"ctrllicenca/internal/handler"
+	"ctrllicenca/internal/store"
 )
 
 func getEnv(key, def string) string {
@@ -48,23 +48,23 @@ func main() {
 	mux.HandleFunc("POST /desenvolvedores/{id}/update", auth.Protected(db, handler.HandleUpdateDev(db)))
 	mux.HandleFunc("POST /desenvolvedores/{id}/delete", auth.Protected(db, handler.HandleDeleteDev(db)))
 
-	// Licencas Delphi por Dev
+	// Licencas
 	mux.HandleFunc("GET /licencas", auth.Protected(db, handler.HandleLicencas(db)))
-	mux.HandleFunc("POST /licencas", auth.Protected(db, handler.HandleCreateLicenca(db)))
-	mux.HandleFunc("POST /licencas/{id}/update", auth.Protected(db, handler.HandleUpdateLicenca(db)))
+	mux.HandleFunc("POST /licencas", auth.AdminOnly(db, handler.HandleCreateLicenca(db)))
+	mux.HandleFunc("POST /licencas/{id}/update", auth.AdminOnly(db, handler.HandleUpdateLicenca(db)))
 	mux.HandleFunc("POST /licencas/{id}/vincular", auth.Protected(db, handler.HandleVincularDevLicenca(db)))
-	mux.HandleFunc("POST /licencas/{id}/delete", auth.Protected(db, handler.HandleDeleteLicenca(db)))
+	mux.HandleFunc("POST /licencas/{id}/delete", auth.AdminOnly(db, handler.HandleDeleteLicenca(db)))
 
 	// Grupos de Licenca
-	mux.HandleFunc("POST /grupos", auth.Protected(db, handler.HandleCreateGrupo(db)))
-	mux.HandleFunc("POST /grupos/{id}/delete", auth.Protected(db, handler.HandleDeleteGrupo(db)))
+	mux.HandleFunc("POST /grupos", auth.AdminOnly(db, handler.HandleCreateGrupo(db)))
+	mux.HandleFunc("POST /grupos/{id}/delete", auth.AdminOnly(db, handler.HandleDeleteGrupo(db)))
 
 	// Auxiliares
 	mux.HandleFunc("GET /auxiliares", auth.Protected(db, handler.HandleAuxiliares(db)))
 	mux.HandleFunc("POST /auxiliares", auth.Protected(db, handler.HandleCreateAuxiliar(db)))
 	mux.HandleFunc("POST /auxiliares/{id}/delete", auth.Protected(db, handler.HandleDeleteAuxiliar(db)))
 
-	// Componentes Delphi
+	// Componentes
 	mux.HandleFunc("GET /componentes", auth.Protected(db, handler.HandleComponentes(db)))
 	mux.HandleFunc("POST /componentes", auth.Protected(db, handler.HandleCreateComponente(db)))
 	mux.HandleFunc("POST /componentes/{id}/update", auth.Protected(db, handler.HandleUpdateComponente(db)))
@@ -77,7 +77,7 @@ func main() {
 	// Importar / Exportar
 	mux.HandleFunc("GET /importexport", auth.Protected(db, handler.HandleImportExport(db)))
 	mux.HandleFunc("GET /importexport/export", auth.Protected(db, handler.HandleExportCSV(db)))
-	mux.HandleFunc("POST /importexport/import", auth.Protected(db, handler.HandleImportCSV(db)))
+	mux.HandleFunc("POST /importexport/import", auth.AdminOnly(db, handler.HandleImportCSV(db)))
 
 	// Usuarios (admin only)
 	mux.HandleFunc("GET /usuarios", auth.AdminOnly(db, handler.HandleUsuarios(db)))
@@ -90,7 +90,7 @@ func main() {
 	mux.HandleFunc("POST /minha-senha", auth.Protected(db, handler.HandleMinhaSenha(db)))
 
 	port := getEnv("PORT", "8081")
-	log.Printf("delphiLic iniciado em http://localhost:%s", port)
+	log.Printf("CtrlLicença iniciado em http://localhost:%s", port)
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatal(err)
 	}

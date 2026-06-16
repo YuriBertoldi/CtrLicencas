@@ -1,5 +1,5 @@
 /* ====================================================
-   delphiLic — Design System
+   CtrlLicença — Design System
    Baseado no FinBertoldi, accent azul (#3498db)
    ==================================================== */
 
@@ -278,7 +278,12 @@ body.has-sidebar { display: flex; min-height: 100vh; }
 
 @media (max-width: 768px) {
   .page-header { flex-direction: column; align-items: flex-start; }
-  .page-header > button { width: 100%; }
+  .page-header > button,
+  .page-header > div { width: 100%; }
+  .page-header > div { flex-wrap: wrap; }
+  .page-header > div > a,
+  .page-header > div > button { flex: 1; min-width: 0; justify-content: center; }
+  .page-header h1 { font-size: 1.25rem; }
 }
 
 /* ====================================================
@@ -425,15 +430,16 @@ table tbody tr:hover { background: var(--border-soft); }
 .col-id { color: var(--text-muted); font-size: .8rem; width: 44px; }
 .text-muted { color: var(--text-muted); }
 .obs-cell { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.col-serial { white-space: nowrap; }
+.col-serial { }
+.col-versao { width: 65px; }
 
 /* cabeçalhos ordenáveis */
 th[data-sort] { cursor: pointer; user-select: none; white-space: nowrap; }
 th[data-sort]:hover { color: var(--color-accent); }
 .sort-ico { font-size: .7em; opacity: .45; margin-left: .2rem; }
 th[data-sort]:hover .sort-ico { opacity: .85; }
-.col-edn    { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.col-dev    { white-space: nowrap; }
+.col-edn    { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.col-dev    { }
 
 code {
   font-size: .82rem;
@@ -442,7 +448,7 @@ code {
   padding: .12rem .42rem; border-radius: 5px;
   color: #7ec8e3;
 }
-.serial { letter-spacing: .04em; white-space: nowrap; }
+.serial { letter-spacing: .04em; word-break: break-all; }
 
 .no-results {
   padding: 2rem; text-align: center;
@@ -497,15 +503,16 @@ code {
 .btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
 .btn-sm {
-  display: inline-flex; align-items: center; gap: .3rem;
-  height: 30px; padding: 0 .75rem; border-radius: 8px;
-  font-size: .78rem; font-weight: 600; font-family: inherit;
-  background: var(--bg-elev-2); border: 1px solid var(--border-soft);
-  color: var(--text-secondary); cursor: pointer;
+  display: inline-flex !important; align-items: center !important; gap: .3rem;
+  width: auto !important; height: 30px !important; padding: 0 .75rem !important; border-radius: 8px !important;
+  font-size: .78rem !important; font-weight: 600; font-family: inherit;
+  background: var(--bg-elev-2) !important; border: 1px solid var(--border-soft) !important;
+  color: var(--text-secondary) !important; cursor: pointer;
   text-decoration: none; white-space: nowrap;
   transition: border-color .15s, color .15s;
+  box-shadow: none !important; margin: 0 !important;
 }
-.btn-sm:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.btn-sm:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
 
 /* botoes icone nas tabelas: 32x32 */
 .btn-icon {
@@ -522,10 +529,13 @@ code {
 .btn-view:hover { border-color: var(--color-teal);   color: var(--color-teal);   transform: translateY(-1px); }
 .btn-link:hover { border-color: var(--color-orange); color: var(--color-orange); transform: translateY(-1px); }
 
-/* cel de acoes: grid 2×2 */
-.col-actions { text-align: right; width: 72px; min-width: 72px; vertical-align: middle; }
-.actions-grid { display: grid; grid-template-columns: 32px 32px; gap: 3px; justify-content: end; }
+/* cel de acoes: grid flexível */
+.col-actions { text-align: right; width: 76px; min-width: 76px; vertical-align: middle; white-space: nowrap; }
+.actions-grid { display: inline-grid; grid-template-columns: 32px 32px; gap: 3px; justify-content: end; }
 .actions-grid form { display: contents; }
+/* quando tem 3 ou mais botões numa linha (ex: usuarios) */
+.actions-grid--3 { grid-template-columns: 32px 32px 32px; }
+.col-actions:has(.actions-grid--3) { width: 108px; min-width: 108px; }
 /* garantir que submit dentro de actions-grid seja identico ao btn-icon */
 .col-actions button[type="submit"] {
   display: inline-flex !important; align-items: center !important; justify-content: center !important;
@@ -541,6 +551,9 @@ code {
   border-color: var(--color-red) !important; color: var(--color-red) !important;
   background: rgba(231,76,60,0.08) !important;
 }
+/* forms com display:contents — botoes herdam flex do pai, nao do form */
+form[style*="display:contents"] button { width: auto !important; }
+
 .w-full { width: 100%; justify-content: center; }
 
 /* ====================================================
@@ -621,7 +634,9 @@ label { color: var(--text-secondary); font-weight: 500; display: block; margin-b
   border-radius: var(--radius-lg);
   padding: 2.25rem 2rem;
   box-shadow: 0 8px 40px rgba(0,0,0,.5);
+  margin: 1rem;
 }
+.login-main { padding: 1rem; }
 .login-brand { text-align: center; margin-bottom: 1.75rem; }
 .login-brand p { color: var(--text-muted); font-size: .88rem; margin: .25rem 0 0; }
 .login-brand h2 { margin: .3rem 0 .2rem; font-size: 1.4rem; }
@@ -812,5 +827,46 @@ dialog footer .btn-secondary {
 }
 @media (max-width: 700px) {
   .ie-card { flex-direction: column; align-items: flex-start; }
-  .ie-form { flex-direction: column; align-items: flex-start; }
+  .ie-import-actions { width: 100%; }
+  .ie-import-actions form { flex-direction: column; align-items: stretch; }
+  .ie-import-actions input[type="file"] { min-width: 0 !important; width: 100% !important; }
+}
+
+/* ====================================================
+   MOBILE: toque, tabelas, dialogs
+   ==================================================== */
+@media (max-width: 600px) {
+  /* Touch targets maiores */
+  .btn-icon, .col-actions button[type="submit"] {
+    width: 38px !important; height: 38px !important; font-size: .95rem !important;
+  }
+  .actions-grid { grid-template-columns: 38px 38px; gap: 4px; }
+
+  /* Data rows empilham label/valor */
+  .data-row { flex-wrap: wrap; }
+  .data-label { min-width: unset; width: 100%; }
+
+  /* Dialog footers empilham */
+  dialog footer { flex-wrap: wrap; gap: .5rem; }
+  dialog footer button,
+  dialog footer a,
+  dialog footer .btn-primary,
+  dialog footer .btn-secondary { flex: 1 1 auto !important; justify-content: center; text-align: center; }
+  /* Links de historico no footer ocupam largura total */
+  dialog footer a { width: 100% !important; margin-right: 0 !important; }
+
+  /* Dialog padding menor */
+  dialog header { padding: 1rem 1.2rem; }
+  dialog form { padding: 1rem 1.2rem; }
+  dialog article > .data-view { padding: 1rem 1.2rem; }
+  dialog footer { padding: .75rem 1.2rem; }
+
+  /* Pagination empilha */
+  .pagination { flex-direction: column; gap: .5rem; }
+
+  /* col-actions: manter compacta mesmo no mobile (tabela rola horizontalmente) */
+
+  /* Stat cards menores */
+  .stat-value { font-size: 1.5rem; }
+  .stat-label { font-size: .62rem; }
 }

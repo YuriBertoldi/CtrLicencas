@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"delphilic/internal/models"
+	"ctrllicenca/internal/models"
 )
 
-const sessionCookie = "dlicsession"
+const sessionCookie = "ctrllic_session"
 const sessionDuration = 24 * time.Hour
 
 func NewToken() string {

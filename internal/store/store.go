@@ -9,13 +9,13 @@ import (
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 
-	"delphilic/internal/models"
+	"ctrllicenca/internal/models"
 )
 
 func NewDB() *sql.DB {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		dsn = "postgres://delphilic:delphilic@localhost:5433/delphilic?sslmode=disable"
+		dsn = "postgres://ctrllicenca:ctrllicenca@localhost:5433/ctrllicenca?sslmode=disable"
 	}
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -215,7 +215,7 @@ func EnsureAdmin(db *sql.DB) error {
 	email := os.Getenv("ADMIN_EMAIL")
 	senha := os.Getenv("ADMIN_SENHA")
 	if email == "" {
-		email = "admin@delphilic.local"
+		email = "admin@ctrllicenca.local"
 	}
 	if senha == "" {
 		senha = "admin123"

@@ -5,9 +5,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: delphilic
-      POSTGRES_PASSWORD: delphilic
-      POSTGRES_DB: delphilic
+      POSTGRES_USER: ctrllicenca
+      POSTGRES_PASSWORD: ctrllicenca
+      POSTGRES_DB: ctrllicenca
     ports:
       - "5433:5432"
     volumes:
@@ -20,8 +20,8 @@ services:
       - db
     environment:
       PORT: 8081
-      DATABASE_URL: postgres://delphilic:delphilic@db:5432/delphilic?sslmode=disable
-      ADMIN_EMAIL: admin@delphilic.local
+      DATABASE_URL: postgres://ctrllicenca:ctrllicenca@db:5432/ctrllicenca?sslmode=disable
+      ADMIN_EMAIL: admin@ctrllicenca.local
       ADMIN_SENHA: admin123
     ports:
       - "8081:8081"

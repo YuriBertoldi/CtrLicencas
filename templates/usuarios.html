@@ -2,7 +2,7 @@
 <div class="page-header">
   <div>
     <h1>Usuarios do Sistema</h1>
-    <p class="page-subtitle">Gerenciamento de acesso ao delphiLic</p>
+    <p class="page-subtitle">Gerenciamento de acesso ao sistema</p>
   </div>
   <button class="btn-primary" data-open-dialog="dlg-novo-user">+ Novo Usuario</button>
 </div>
@@ -11,22 +11,20 @@
 {{if .Sucesso}}<div class="alert alert-success">{{.Sucesso}}</div>{{end}}
 
 <div class="table-wrapper">
-  <table>
+  <table style="min-width:700px">
     <thead>
       <tr>
-        <th>#</th>
         <th>Nome</th>
         <th>Email</th>
         <th>Admin</th>
         <th>Ativo</th>
         <th>Criado em</th>
-        <th class="col-actions">Acoes</th>
+        <th class="col-actions">Ações</th>
       </tr>
     </thead>
     <tbody>
       {{range .Usuarios}}
       <tr>
-        <td class="col-id">{{.ID}}</td>
         <td><strong>{{.Nome}}</strong></td>
         <td>{{.Email}}</td>
         <td>
@@ -39,17 +37,15 @@
         </td>
         <td>{{date .CriadoEm}}</td>
         <td class="col-actions">
-          <form method="POST" action="/usuarios/{{.ID}}/toggle-ativo" style="display:inline">
-            <button type="submit" class="btn-sm">
-              {{if .Ativo}}Desativar{{else}}Ativar{{end}}
-            </button>
-          </form>
-          <form method="POST" action="/usuarios/{{.ID}}/toggle-admin" style="display:inline">
-            <button type="submit" class="btn-sm">
-              {{if .Admin}}Remover Admin{{else}}Tornar Admin{{end}}
-            </button>
-          </form>
-          <button class="btn-sm" data-open-dialog="dlg-reset-{{.ID}}">Reset Senha</button>
+          <div class="actions-grid actions-grid--3">
+            <form method="POST" action="/usuarios/{{.ID}}/toggle-ativo">
+              <button type="submit" class="btn-icon {{if .Ativo}}btn-del{{else}}btn-view{{end}}" title="{{if .Ativo}}Desativar{{else}}Ativar{{end}}">{{if .Ativo}}&#x23F8;{{else}}&#x25B6;{{end}}</button>
+            </form>
+            <form method="POST" action="/usuarios/{{.ID}}/toggle-admin">
+              <button type="submit" class="btn-icon {{if .Admin}}btn-del{{else}}btn-link{{end}}" title="{{if .Admin}}Remover Admin{{else}}Tornar Admin{{end}}">&#x1F6E1;</button>
+            </form>
+            <button class="btn-icon btn-edit" data-open-dialog="dlg-reset-{{.ID}}" title="Reset Senha">&#x1F511;</button>
+          </div>
         </td>
       </tr>
 
@@ -68,6 +64,11 @@
       {{end}}
     </tbody>
   </table>
+</div>
+<div class="legenda-grid">
+  <span class="legenda-item">&#x23F8;/&#x25B6; Ativar/Desativar</span>
+  <span class="legenda-item">&#x1F6E1; Admin</span>
+  <span class="legenda-item">&#x1F511; Reset Senha</span>
 </div>
 
 <!-- Dialog: novo usuario -->

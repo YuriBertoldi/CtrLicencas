@@ -1,0 +1,7 @@
+# Binarios e imagens exportadas
+*.exe
+*.tar
+*.tar.gz
+
+# Variaveis de ambiente
+.env
